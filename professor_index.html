@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bryant Major Advisor — Career & AI Impact Explorer</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0c10;
+            --surface: #13161d;
+            --surface-2: #1a1e28;
+            --surface-3: #222833;
+            --border: #2a3040;
+            --text: #e8eaf0;
+            --text-dim: #8890a4;
+            --text-muted: #5a6278;
+            --accent: #f0a040;
+            --accent-glow: rgba(240, 160, 64, 0.15);
+            --green: #34d399;
+            --green-dim: rgba(52, 211, 153, 0.12);
+            --red: #f87171;
+            --red-dim: rgba(248, 113, 113, 0.12);
+            --blue: #60a5fa;
+            --blue-dim: rgba(96, 165, 250, 0.12);
+            --purple: #a78bfa;
+            --yellow: #fbbf24;
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ---- HERO ---- */
+        .hero {
+            position: relative;
+            padding: 80px 40px 60px;
+            text-align: center;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border);
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -200px; left: 50%; transform: translateX(-50%);
+            width: 800px; height: 800px;
+            background: radial-gradient(circle, rgba(240,160,64,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-bottom: 24px;
+        }
+        .hero-badge span { color: var(--accent); font-weight: 700; }
+        .hero h1 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(2.4rem, 5vw, 3.8rem);
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            max-width: 640px;
+            margin: 0 auto;
+            color: var(--text-dim);
+            font-size: 17px;
+        }
+        .hero-source {
+            margin-top: 20px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .hero-source a { color: var(--blue); text-decoration: none; }
+        .hero-source a:hover { text-decoration: underline; }
+
+        /* ---- STATS BAR ---- */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .stat-item {
+            background: var(--surface);
+            padding: 24px 28px;
+            text-align: center;
+        }
+        .stat-value {
+            font-family: 'Fraunces', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-top: 4px;
+        }
+
+        /* ---- CONTROLS ---- */
+        .controls {
+            padding: 28px 40px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+        .controls label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .controls select, .controls input[type="text"] {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .controls select:hover, .controls input:hover {
+            border-color: var(--accent);
+        }
+        .controls select:focus, .controls input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        .control-group { display: flex; flex-direction: column; gap: 4px; }
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+        }
+        .search-box input { width: 100%; }
+
+        .compare-toggle {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .compare-btn {
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: none;
+        }
+        .compare-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px var(--accent-glow); }
+        .compare-btn.visible { display: block; }
+        .compare-count {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            color: var(--text-dim);
+            display: none;
+        }
+        .compare-count.visible { display: block; }
+
+        /* ---- VIEW TOGGLE ---- */
+        .view-toggle {
+            display: flex;
+            background: var(--surface-2);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .view-toggle button {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            padding: 8px 14px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .view-toggle button.active {
+            background: var(--accent);
+            color: var(--bg);
+            font-weight: 700;
+        }
+
+        /* ---- MAJOR GRID ---- */
+        .content { padding: 32px 40px 80px; }
+        .major-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+            gap: 20px;
+        }
+
+        /* ---- MAJOR CARD ---- */
+        .major-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .major-card:hover {
+            border-color: rgba(240,160,64,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .major-card.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        .card-header {
+            padding: 24px 24px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .card-header h2 {
+            font-family: 'Fraunces', serif;
+            font-size: 22px;
+            font-weight: 700;
+            flex: 1;
+        }
+        .college-tag {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-weight: 500;
+            white-space: nowrap;
+            margin-left: 12px;
+        }
+        .college-tag.business { background: var(--blue-dim); color: var(--blue); }
+        .college-tag.arts { background: rgba(167,139,250,0.12); color: var(--purple); }
+        .college-tag.health { background: var(--green-dim); color: var(--green); }
+
+        .card-desc {
+            padding: 0 24px 16px;
+            font-size: 14px;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        .career-block {
+            margin: 0 16px 16px;
+            background: var(--surface-2);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+        .career-header {
+            padding: 14px 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        .career-header:hover { background: var(--surface-3); }
+        .career-title {
+            font-weight: 700;
+            font-size: 15px;
+            flex: 1;
+        }
+        .career-salary {
+            font-family: 'Fraunces', serif;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--green);
+            margin-left: 12px;
+        }
+        .career-expand-icon {
+            margin-left: 10px;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+            font-size: 18px;
+        }
+        .career-block.expanded .career-expand-icon { transform: rotate(180deg); }
+
+        .career-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+        .career-block.expanded .career-details {
+            max-height: 800px;
+        }
+        .career-details-inner {
+            padding: 0 16px 16px;
+        }
+
+        .career-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .metric {
+            background: var(--surface);
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            text-align: center;
+        }
+        .metric-value {
+            font-weight: 700;
+            font-size: 15px;
+        }
+        .metric-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .salary-range {
+            margin-bottom: 14px;
+        }
+        .salary-range-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .salary-bar-bg {
+            height: 8px;
+            background: var(--surface);
+            border-radius: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+        .salary-bar-fill {
+            height: 100%;
+            border-radius: 100px;
+            background: linear-gradient(90deg, var(--accent), var(--green));
+            transition: width 0.6s ease;
+        }
+        .salary-bar-median {
+            position: absolute;
+            top: -3px;
+            width: 14px;
+            height: 14px;
+            background: var(--text);
+            border-radius: 50%;
+            border: 2px solid var(--surface-2);
+            transform: translateX(-50%);
+        }
+
+        /* AI Impact Meter */
+        .ai-impact-section {
+            margin-top: 14px;
+        }
+        .ai-impact-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .ai-impact-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .ai-badge {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 100px;
+        }
+        .ai-badge.low { background: var(--green-dim); color: var(--green); }
+        .ai-badge.low-medium { background: rgba(52, 211, 153, 0.08); color: #6ee7b7; }
+        .ai-badge.medium { background: rgba(251, 191, 36, 0.12); color: var(--yellow); }
+        .ai-badge.medium-high { background: rgba(248, 113, 113, 0.08); color: #fca5a5; }
+        .ai-badge.high { background: var(--red-dim); color: var(--red); }
+
+        .ai-meter {
+            height: 6px;
+            background: var(--surface);
+            border-radius: 100px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .ai-meter-fill {
+            height: 100%;
+            border-radius: 100px;
+            transition: width 0.6s ease;
+        }
+        .ai-meter-fill.low { background: var(--green); width: 20%; }
+        .ai-meter-fill.low-medium { background: #6ee7b7; }
+        .ai-meter-fill.medium { background: var(--yellow); }
+        .ai-meter-fill.medium-high { background: #fca5a5; }
+        .ai-meter-fill.high { background: var(--red); }
+
+        .ai-analysis {
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.6;
+            padding: 12px;
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            border-left: 3px solid var(--accent);
+        }
+
+        .bls-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--blue);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .bls-link:hover { color: var(--accent); text-decoration: underline; }
+
+        .card-select {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: 2px solid var(--border);
+            background: var(--surface-2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: transparent;
+            transition: all 0.2s;
+            z-index: 2;
+        }
+        .card-select:hover { border-color: var(--accent); }
+        .card-select.checked {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg);
+        }
+
+        /* ---- COMPARE MODAL ---- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            max-width: 1100px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 32px;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .modal-header h2 {
+            font-family: 'Fraunces', serif;
+            font-size: 24px;
+        }
+        .modal-close {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .modal-close:hover { background: var(--red-dim); border-color: var(--red); }
+
+        .compare-grid {
+            display: grid;
+            gap: 20px;
+        }
+        .compare-row {
+            display: grid;
+            grid-template-columns: 140px repeat(var(--cols), 1fr);
+            gap: 12px;
+            align-items: center;
+        }
+        .compare-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .compare-cell {
+            background: var(--surface-2);
+            padding: 14px 16px;
+            border-radius: var(--radius-sm);
+            text-align: center;
+        }
+        .compare-cell.header {
+            background: var(--surface-3);
+            font-family: 'Fraunces', serif;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .compare-cell .big { font-size: 20px; font-weight: 700; }
+        .compare-cell .sub { font-size: 12px; color: var(--text-muted); }
+
+        /* ---- SCATTER VIEW ---- */
+        .scatter-container {
+            display: none;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        .scatter-container.active { display: block; }
+        .scatter-title {
+            font-family: 'Fraunces', serif;
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+        .scatter-subtitle {
+            font-size: 14px;
+            color: var(--text-dim);
+            margin-bottom: 24px;
+        }
+        .scatter-chart {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            border-left: 2px solid var(--border);
+            border-bottom: 2px solid var(--border);
+        }
+        .scatter-dot {
+            position: absolute;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--bg);
+        }
+        .scatter-dot:hover {
+            transform: scale(1.5);
+            z-index: 10;
+        }
+        .scatter-tooltip {
+            display: none;
+            position: absolute;
+            background: var(--surface-3);
+            border: 1px solid var(--border);
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            z-index: 20;
+            pointer-events: none;
+            min-width: 200px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .scatter-tooltip.active { display: block; }
+        .scatter-axis-label {
+            position: absolute;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .scatter-axis-x { bottom: -30px; left: 50%; transform: translateX(-50%); }
+        .scatter-axis-y { top: 50%; left: -44px; transform: translateY(-50%) rotate(-90deg); }
+        .scatter-tick {
+            position: absolute;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .scatter-legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+        .scatter-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+        .scatter-legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        /* ---- TABLE VIEW ---- */
+        .table-container {
+            display: none;
+            overflow-x: auto;
+        }
+        .table-container.active { display: block; }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        .data-table th {
+            background: var(--surface-2);
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            font-weight: 500;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .data-table th:hover { color: var(--accent); }
+        .data-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+        .data-table tr:hover td { background: var(--surface-2); }
+        .data-table .salary-col { color: var(--green); font-weight: 700; font-family: 'Fraunces', serif; }
+        .data-table .growth-col { font-weight: 700; }
+        .growth-positive { color: var(--green); }
+        .growth-negative { color: var(--red); }
+
+        /* ---- EMPTY STATE ---- */
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: var(--text-muted);
+        }
+        .empty-state h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 20px;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+        }
+
+        /* ---- RESPONSIVE ---- */
+        @media (max-width: 768px) {
+            .hero { padding: 48px 20px 40px; }
+            .controls { padding: 20px; }
+            .content { padding: 20px; }
+            .major-grid { grid-template-columns: 1fr; }
+            .compare-row { grid-template-columns: 100px repeat(var(--cols), 1fr); }
+            .career-metrics { grid-template-columns: 1fr; }
+            .scatter-chart { height: 350px; }
+        }
+
+        /* ---- ANIMATIONS ---- */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .major-card { animation: fadeInUp 0.4s ease backwards; }
+        .major-card:nth-child(2) { animation-delay: 0.05s; }
+        .major-card:nth-child(3) { animation-delay: 0.1s; }
+        .major-card:nth-child(4) { animation-delay: 0.15s; }
+        .major-card:nth-child(5) { animation-delay: 0.2s; }
+        .major-card:nth-child(6) { animation-delay: 0.25s; }
+
+        /* ---- SCROLLBAR ---- */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        .disclaimer {
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+        .disclaimer a { color: var(--blue); text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <div class="hero-badge">
+        <span>🎓</span> Bryant University Major Advisor
+    </div>
+    <h1>Find the Major That<br>Fits Your Future</h1>
+    <p>Explore 31 Bryant University majors with real salary data, job growth projections from the Bureau of Labor Statistics, and an AI-readiness assessment for every career path.</p>
+    <div class="hero-source">
+        Data: <a href="https://www.bls.gov/ooh/" target="_blank">Bureau of Labor Statistics OOH</a> · Programs: <a href="https://www.bryant.edu/undergraduate/academics/undergraduate-programs" target="_blank">Bryant University</a>
+    </div>
+</div>
+
+<div class="stats-bar" id="statsBar">
+    <div class="stat-item"><div class="stat-value" id="statMajors">—</div><div class="stat-label">Majors Tracked</div></div>
+    <div class="stat-item"><div class="stat-value" id="statCareers">—</div><div class="stat-label">Career Paths</div></div>
+    <div class="stat-item"><div class="stat-value" id="statSalary">—</div><div class="stat-label">Avg Median Salary</div></div>
+    <div class="stat-item"><div class="stat-value" id="statGrowth">—</div><div class="stat-label">Avg Job Growth</div></div>
+    <div class="stat-item"><div class="stat-value" id="statAI">—</div><div class="stat-label">Avg AI Exposure</div></div>
+</div>
+
+<div class="controls">
+    <div class="control-group">
+        <label>College</label>
+        <select id="filterCollege">
+            <option value="">All Colleges</option>
+            <option value="College of Business">College of Business</option>
+            <option value="College of Arts & Sciences">Arts & Sciences</option>
+            <option value="School of Health & Behavioral Sciences">Health & Behavioral Sciences</option>
+        </select>
+    </div>
+    <div class="control-group">
+        <label>Sort By</label>
+        <select id="sortBy">
+            <option value="name">Name A–Z</option>
+            <option value="salary_high">Highest Salary</option>
+            <option value="salary_low">Lowest Salary</option>
+            <option value="growth">Fastest Growth</option>
+            <option value="ai_safe">Most AI-Resilient</option>
+            <option value="ai_risk">Most AI-Exposed</option>
+        </select>
+    </div>
+    <div class="control-group">
+        <label>AI Impact</label>
+        <select id="filterAI">
+            <option value="">All Levels</option>
+            <option value="low">Low (Most Safe)</option>
+            <option value="low-medium">Low-Medium</option>
+            <option value="medium">Medium</option>
+            <option value="medium-high">Medium-High</option>
+            <option value="high">High (Most Exposed)</option>
+        </select>
+    </div>
+    <div class="control-group search-box">
+        <label>Search</label>
+        <input type="text" id="searchInput" placeholder="Search majors or careers…">
+    </div>
+    <div class="control-group">
+        <label>View</label>
+        <div class="view-toggle">
+            <button class="active" data-view="cards">Cards</button>
+            <button data-view="table">Table</button>
+            <button data-view="scatter">Chart</button>
+        </div>
+    </div>
+    <div class="compare-toggle">
+        <span class="compare-count" id="compareCount">0 selected</span>
+        <button class="compare-btn" id="compareBtn" onclick="openCompare()">Compare</button>
+    </div>
+</div>
+
+<div class="content">
+    <div class="scatter-container" id="scatterView">
+        <div class="scatter-title">Salary vs. AI Exposure</div>
+        <div class="scatter-subtitle">Each dot represents a career path. Larger dots = faster job growth. Hover for details.</div>
+        <div class="scatter-chart" id="scatterChart">
+            <div class="scatter-axis-label scatter-axis-x">AI Exposure Score →</div>
+            <div class="scatter-axis-label scatter-axis-y">Median Salary →</div>
+            <div class="scatter-tooltip" id="scatterTooltip"></div>
+        </div>
+        <div class="scatter-legend">
+            <div class="scatter-legend-item"><div class="scatter-legend-dot" style="background:var(--blue)"></div> College of Business</div>
+            <div class="scatter-legend-item"><div class="scatter-legend-dot" style="background:var(--purple)"></div> Arts & Sciences</div>
+            <div class="scatter-legend-item"><div class="scatter-legend-dot" style="background:var(--green)"></div> Health & Behavioral Sciences</div>
+            <div class="scatter-legend-item"><span style="font-size:12px;color:var(--text-muted)">Dot size = Job growth rate</span></div>
+        </div>
+    </div>
+    <div class="table-container" id="tableView"></div>
+    <div class="major-grid" id="majorGrid"></div>
+</div>
+
+<div class="modal-overlay" id="compareModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Major Comparison</h2>
+            <button class="modal-close" onclick="closeCompare()">✕</button>
+        </div>
+        <div id="compareContent"></div>
+    </div>
+</div>
+
+<div class="disclaimer">
+    Salary data from the <a href="https://www.bls.gov/ooh/" target="_blank">U.S. Bureau of Labor Statistics</a> Occupational Outlook Handbook (2024 estimates).<br>
+    Job growth projections are for 2023–2033. AI impact assessments are qualitative estimates and should be considered alongside personal interests, aptitudes, and goals.<br>
+    Programs listed from <a href="https://www.bryant.edu/undergraduate/academics/undergraduate-programs" target="_blank">Bryant University Undergraduate Programs</a>.
+</div>
+
+<script>
+let allMajors = [];
+let selectedIds = new Set();
+let currentView = 'cards';
+
+// Fetch initial data
+async function init() {
+    const [majorsRes, statsRes] = await Promise.all([
+        fetch('/api/majors?sort=name'),
+        fetch('/api/stats')
+    ]);
+    allMajors = await majorsRes.json();
+    const stats = await statsRes.json();
+
+    document.getElementById('statMajors').textContent = stats.total_majors;
+    document.getElementById('statCareers').textContent = stats.total_careers;
+    document.getElementById('statSalary').textContent = '$' + stats.avg_salary.toLocaleString();
+    document.getElementById('statGrowth').textContent = stats.avg_growth + '%';
+    document.getElementById('statAI').textContent = stats.avg_ai_score + '/100';
+
+    renderCards(allMajors);
+    renderScatter(stats.all_careers);
+    renderTable(allMajors);
+}
+
+function formatSalary(n) {
+    return '$' + n.toLocaleString();
+}
+
+function getCollegeClass(college) {
+    if (college.includes('Business')) return 'business';
+    if (college.includes('Arts')) return 'arts';
+    return 'health';
+}
+
+function getCollegeShort(college) {
+    if (college.includes('Business')) return 'Business';
+    if (college.includes('Arts')) return 'Arts & Sci';
+    return 'Health & BS';
+}
+
+function getAIClass(impact) {
+    return impact.toLowerCase().replace(' ', '-');
+}
+
+function getAIColor(score) {
+    if (score <= 25) return 'var(--green)';
+    if (score <= 40) return '#6ee7b7';
+    if (score <= 55) return 'var(--yellow)';
+    if (score <= 70) return '#fca5a5';
+    return 'var(--red)';
+}
+
+function renderCards(majors) {
+    const grid = document.getElementById('majorGrid');
+    if (majors.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><h3>No majors found</h3><p>Try adjusting your filters or search terms.</p></div>';
+        return;
+    }
+    grid.innerHTML = majors.map(m => `
+        <div class="major-card ${selectedIds.has(m.id) ? 'selected' : ''}" data-id="${m.id}">
+            <div class="card-select ${selectedIds.has(m.id) ? 'checked' : ''}" onclick="toggleSelect(${m.id}, event)">✓</div>
+            <div class="card-header">
+                <h2>${m.major}</h2>
+                <span class="college-tag ${getCollegeClass(m.college)}">${getCollegeShort(m.college)}</span>
+            </div>
+            <div class="card-desc">${m.description}</div>
+            ${m.careers.map((c, i) => `
+                <div class="career-block" id="career-${m.id}-${i}">
+                    <div class="career-header" onclick="toggleCareer('career-${m.id}-${i}')">
+                        <span class="career-title">${c.title}</span>
+                        <span class="career-salary">${formatSalary(c.median_salary)}</span>
+                        <span class="career-expand-icon">▾</span>
+                    </div>
+                    <div class="career-details">
+                        <div class="career-details-inner">
+                            <div class="career-metrics">
+                                <div class="metric">
+                                    <div class="metric-value" style="color:${c.growth_rate >= 0 ? 'var(--green)' : 'var(--red)'}">${c.growth_rate >= 0 ? '+' : ''}${c.growth_rate}%</div>
+                                    <div class="metric-label">10yr Growth</div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-value">${c.total_employment.toLocaleString()}</div>
+                                    <div class="metric-label">Total Jobs</div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-value">${c.annual_openings.toLocaleString()}</div>
+                                    <div class="metric-label">Openings/Year</div>
+                                </div>
+                            </div>
+                            <div class="salary-range">
+                                <div class="salary-range-header">
+                                    <span>Entry: ${formatSalary(c.entry_salary)}</span>
+                                    <span>Top: ${formatSalary(c.top_salary)}</span>
+                                </div>
+                                <div class="salary-bar-bg">
+                                    <div class="salary-bar-fill" style="width:${(c.top_salary / 350000) * 100}%"></div>
+                                    <div class="salary-bar-median" style="left:${(c.median_salary / 350000) * 100}%"></div>
+                                </div>
+                            </div>
+                            <div class="ai-impact-section">
+                                <div class="ai-impact-header">
+                                    <span class="ai-impact-label">AI Disruption Risk</span>
+                                    <span class="ai-badge ${getAIClass(c.ai_impact)}">${c.ai_impact} (${c.ai_impact_score}/100)</span>
+                                </div>
+                                <div class="ai-meter">
+                                    <div class="ai-meter-fill ${getAIClass(c.ai_impact)}" style="width:${c.ai_impact_score}%"></div>
+                                </div>
+                                <div class="ai-analysis">${c.ai_analysis}</div>
+                            </div>
+                            <a class="bls-link" href="${c.bls_url}" target="_blank">
+                                📊 View full BLS data →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `).join('');
+}
+
+function toggleCareer(id) {
+    document.getElementById(id).classList.toggle('expanded');
+}
+
+function toggleSelect(id, e) {
+    e.stopPropagation();
+    if (selectedIds.has(id)) {
+        selectedIds.delete(id);
+    } else {
+        if (selectedIds.size >= 4) { alert('You can compare up to 4 majors at once.'); return; }
+        selectedIds.add(id);
+    }
+    updateCompareUI();
+    const card = document.querySelector(`.major-card[data-id="${id}"]`);
+    const checkbox = card.querySelector('.card-select');
+    card.classList.toggle('selected');
+    checkbox.classList.toggle('checked');
+}
+
+function updateCompareUI() {
+    const count = selectedIds.size;
+    const btn = document.getElementById('compareBtn');
+    const countEl = document.getElementById('compareCount');
+    btn.classList.toggle('visible', count >= 2);
+    countEl.classList.toggle('visible', count > 0);
+    countEl.textContent = count + ' selected';
+}
+
+async function openCompare() {
+    const ids = [...selectedIds];
+    const res = await fetch('/api/compare?ids=' + ids.join('&ids='));
+    const data = await res.json();
+
+    const cols = data.length;
+    const content = document.getElementById('compareContent');
+
+    let html = `<div class="compare-grid" style="--cols:${cols}">`;
+
+    // Headers
+    html += `<div class="compare-row"><div class="compare-label">Major</div>${data.map(m =>
+        `<div class="compare-cell header">${m.major}</div>`).join('')}</div>`;
+
+    // College
+    html += `<div class="compare-row"><div class="compare-label">College</div>${data.map(m =>
+        `<div class="compare-cell"><span class="college-tag ${getCollegeClass(m.college)}">${getCollegeShort(m.college)}</span></div>`).join('')}</div>`;
+
+    // Top salary
+    html += `<div class="compare-row"><div class="compare-label">Top Salary</div>${data.map(m => {
+        const best = m.careers.reduce((a, b) => a.median_salary > b.median_salary ? a : b);
+        return `<div class="compare-cell"><div class="big" style="color:var(--green)">${formatSalary(best.median_salary)}</div><div class="sub">${best.title}</div></div>`;
+    }).join('')}</div>`;
+
+    // Growth
+    html += `<div class="compare-row"><div class="compare-label">Best Growth</div>${data.map(m => {
+        const best = m.careers.reduce((a, b) => a.growth_rate > b.growth_rate ? a : b);
+        return `<div class="compare-cell"><div class="big" style="color:${best.growth_rate >= 0 ? 'var(--green)' : 'var(--red)'}">${best.growth_rate >= 0 ? '+' : ''}${best.growth_rate}%</div><div class="sub">${best.growth_label}</div></div>`;
+    }).join('')}</div>`;
+
+    // AI Safety
+    html += `<div class="compare-row"><div class="compare-label">AI Resilience</div>${data.map(m => {
+        const safest = m.careers.reduce((a, b) => a.ai_impact_score < b.ai_impact_score ? a : b);
+        return `<div class="compare-cell"><div class="big" style="color:${getAIColor(safest.ai_impact_score)}">${safest.ai_impact_score}/100</div><div class="sub">${safest.ai_impact}</div></div>`;
+    }).join('')}</div>`;
+
+    // Openings
+    html += `<div class="compare-row"><div class="compare-label">Annual Openings</div>${data.map(m => {
+        const total = m.careers.reduce((s, c) => s + c.annual_openings, 0);
+        return `<div class="compare-cell"><div class="big">${total.toLocaleString()}</div><div class="sub">per year</div></div>`;
+    }).join('')}</div>`;
+
+    html += '</div>';
+    content.innerHTML = html;
+    document.getElementById('compareModal').classList.add('active');
+}
+
+function closeCompare() {
+    document.getElementById('compareModal').classList.remove('active');
+}
+
+// Scatter chart
+function renderScatter(careers) {
+    const chart = document.getElementById('scatterChart');
+    const maxSalary = 250000;
+    const padding = 40;
+    const w = chart.clientWidth - padding;
+    const h = chart.clientHeight - padding;
+
+    // Grid lines
+    for (let i = 0; i <= 4; i++) {
+        const y = padding + (h / 4) * i;
+        const salary = maxSalary - (maxSalary / 4) * i;
+        const line = document.createElement('div');
+        line.style.cssText = `position:absolute;left:0;right:0;top:${y}px;height:1px;background:var(--border);opacity:0.4;`;
+        chart.appendChild(line);
+        const tick = document.createElement('div');
+        tick.className = 'scatter-tick';
+        tick.style.cssText = `left:-50px;top:${y - 7}px;`;
+        tick.textContent = '$' + (salary / 1000) + 'k';
+        chart.appendChild(tick);
+    }
+    for (let i = 0; i <= 4; i++) {
+        const x = padding + (w / 4) * i;
+        const score = (100 / 4) * i;
+        const line = document.createElement('div');
+        line.style.cssText = `position:absolute;top:0;bottom:0;left:${x}px;width:1px;background:var(--border);opacity:0.4;`;
+        chart.appendChild(line);
+        const tick = document.createElement('div');
+        tick.className = 'scatter-tick';
+        tick.style.cssText = `left:${x - 8}px;bottom:-22px;`;
+        tick.textContent = score;
+        chart.appendChild(tick);
+    }
+
+    careers.forEach(c => {
+        const x = padding + (c.ai_impact_score / 100) * w;
+        const y = padding + ((maxSalary - c.median_salary) / maxSalary) * h;
+        const size = Math.max(12, Math.min(36, 10 + c.growth_rate * 0.8));
+        let color = 'var(--blue)';
+        if (c.major.includes('History') || c.major.includes('Literary') || c.major.includes('Spanish') || c.major.includes('Arts') || c.major.includes('Politics') || c.major.includes('Sociology') || c.major.includes('Sports') || c.major.includes('Communication') || c.major.includes('Actuarial') || c.major.includes('Applied Math') || c.major.includes('Business Econ'))
+            color = 'var(--purple)';
+        if (c.major.includes('Biology') || c.major.includes('Health') || c.major.includes('Exercise') || c.major.includes('Psychology'))
+            color = 'var(--green)';
+
+        const dot = document.createElement('div');
+        dot.className = 'scatter-dot';
+        dot.style.cssText = `left:${x - size/2}px;top:${y - size/2}px;width:${size}px;height:${size}px;background:${color};opacity:0.85;`;
+
+        dot.addEventListener('mouseenter', (e) => {
+            const tooltip = document.getElementById('scatterTooltip');
+            tooltip.innerHTML = `<strong>${c.career}</strong><br><span style="color:var(--text-dim)">${c.major}</span><br>Salary: <strong style="color:var(--green)">${formatSalary(c.median_salary)}</strong><br>Growth: <strong>${c.growth_rate}%</strong> · AI Risk: <strong style="color:${getAIColor(c.ai_impact_score)}">${c.ai_impact_score}/100</strong>`;
+            tooltip.classList.add('active');
+            tooltip.style.left = (x + size) + 'px';
+            tooltip.style.top = (y - 30) + 'px';
+        });
+        dot.addEventListener('mouseleave', () => {
+            document.getElementById('scatterTooltip').classList.remove('active');
+        });
+        chart.appendChild(dot);
+    });
+}
+
+function renderTable(majors) {
+    const container = document.getElementById('tableView');
+    let rows = [];
+    majors.forEach(m => {
+        m.careers.forEach(c => {
+            rows.push({ major: m.major, college: m.college, ...c });
+        });
+    });
+
+    container.innerHTML = `
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Major</th>
+                    <th>Career Path</th>
+                    <th>Median Salary</th>
+                    <th>Entry Salary</th>
+                    <th>Top Salary</th>
+                    <th>10yr Growth</th>
+                    <th>Annual Openings</th>
+                    <th>AI Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rows.map(r => `
+                    <tr>
+                        <td><strong>${r.major}</strong></td>
+                        <td>${r.title}</td>
+                        <td class="salary-col">${formatSalary(r.median_salary)}</td>
+                        <td style="color:var(--text-dim)">${formatSalary(r.entry_salary)}</td>
+                        <td style="color:var(--text-dim)">${formatSalary(r.top_salary)}</td>
+                        <td class="growth-col ${r.growth_rate >= 0 ? 'growth-positive' : 'growth-negative'}">${r.growth_rate >= 0 ? '+' : ''}${r.growth_rate}%</td>
+                        <td>${r.annual_openings.toLocaleString()}</td>
+                        <td><span class="ai-badge ${getAIClass(r.ai_impact)}">${r.ai_impact_score}/100</span></td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+// View switching
+document.querySelectorAll('.view-toggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentView = btn.dataset.view;
+
+        document.getElementById('majorGrid').style.display = currentView === 'cards' ? 'grid' : 'none';
+        document.getElementById('tableView').classList.toggle('active', currentView === 'table');
+        document.getElementById('scatterView').classList.toggle('active', currentView === 'scatter');
+    });
+});
+
+// Filters
+async function applyFilters() {
+    const college = document.getElementById('filterCollege').value;
+    const sort = document.getElementById('sortBy').value;
+    const ai = document.getElementById('filterAI').value;
+    const search = document.getElementById('searchInput').value.toLowerCase();
+
+    const params = new URLSearchParams();
+    if (college) params.set('college', college);
+    if (sort) params.set('sort', sort);
+    if (ai) params.set('ai_impact', ai);
+
+    const res = await fetch('/api/majors?' + params.toString());
+    let data = await res.json();
+
+    if (search) {
+        data = data.filter(m =>
+            m.major.toLowerCase().includes(search) ||
+            m.description.toLowerCase().includes(search) ||
+            m.careers.some(c => c.title.toLowerCase().includes(search))
+        );
+    }
+
+    renderCards(data);
+    renderTable(data);
+}
+
+document.getElementById('filterCollege').addEventListener('change', applyFilters);
+document.getElementById('sortBy').addEventListener('change', applyFilters);
+document.getElementById('filterAI').addEventListener('change', applyFilters);
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+// Close modal on overlay click
+document.getElementById('compareModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('compareModal')) closeCompare();
+});
+
+// Init
+init();
+</script>
+</body>
+</html>

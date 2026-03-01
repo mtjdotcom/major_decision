@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bryant Major Advisor — Career & AI Impact Explorer</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* ╔═══════════════════════════════════════════════════════╗
+           ║  SHARED RESET + STRUCTURE                            ║
+           ╚═══════════════════════════════════════════════════════╝ */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { min-height: 100vh; overflow-x: hidden; transition: background 0.4s, color 0.4s; }
+
+        /* ╔═══════════════════════════════════════════════════════╗
+           ║  THEME TOGGLE BUTTON                                 ║
+           ╚═══════════════════════════════════════════════════════╝ */
+        .theme-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 10000;
+            display: flex;
+            border-radius: 100px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+            cursor: pointer;
+            user-select: none;
+        }
+        .theme-toggle button {
+            border: none;
+            padding: 10px 18px;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.25s;
+            letter-spacing: 0.5px;
+            outline: none;
+        }
+
+        /* Professor mode toggle styling */
+        body.professor .theme-toggle button {
+            font-family: 'DM Sans', sans-serif;
+        }
+        body.professor .theme-toggle .tog-professor {
+            background: #f0a040; color: #0a0c10;
+        }
+        body.professor .theme-toggle .tog-gamer {
+            background: #1a1e28; color: #5a6278; border: 1px solid #2a3040;
+        }
+
+        /* Gamer mode toggle styling */
+        body.gamer .theme-toggle button {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
+            padding: 12px 14px;
+            border-radius: 0;
+        }
+        body.gamer .theme-toggle {
+            border-radius: 0;
+            border: 3px solid #fca044;
+        }
+        body.gamer .theme-toggle .tog-gamer {
+            background: #e40058; color: #fcfcfc;
+        }
+        body.gamer .theme-toggle .tog-professor {
+            background: #181830; color: #686868; border: none;
+        }
+
+        /* ╔═══════════════════════════════════════════════════════╗
+           ║  GAMER-ONLY ELEMENTS (hidden in Professor mode)      ║
+           ╚═══════════════════════════════════════════════════════╝ */
+        body.professor .gamer-only { display: none !important; }
+        body.gamer .professor-only { display: none !important; }
+
+        /* CRT scanlines — gamer only */
+        .scanlines {
+            position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1px, transparent 1px, transparent 3px);
+            display: none;
+        }
+        body.gamer .scanlines { display: block; }
+
+        /* Starfield — gamer only */
+        .starfield { position: fixed; inset: 0; z-index: 0; overflow: hidden; display: none; }
+        body.gamer .starfield { display: block; }
+        .star {
+            position: absolute; background: #fcfcfc; width: 2px; height: 2px;
+            animation: twinkle 2s infinite alternate;
+        }
+        @keyframes twinkle { 0% { opacity: 0.2; } 100% { opacity: 1; } }
+
+        /* Floating clouds — gamer only */
+        .cloud {
+            position: absolute; font-size: 40px; opacity: 0.6;
+            animation: floatCloud 30s linear infinite;
+            filter: drop-shadow(0 2px 0 rgba(0,0,0,0.2));
+            display: none;
+        }
+        body.gamer .cloud { display: block; }
+        .cloud:nth-child(1) { top: 30px; left: -100px; animation-duration: 40s; font-size: 30px; }
+        .cloud:nth-child(2) { top: 80px; left: -200px; animation-duration: 55s; animation-delay: -20s; }
+        .cloud:nth-child(3) { top: 55px; left: -150px; animation-duration: 48s; animation-delay: -10s; font-size: 25px; }
+        @keyframes floatCloud { from { transform: translateX(-100px); } to { transform: translateX(calc(100vw + 200px)); } }
+
+        /* Coin spin — gamer only */
+        .title-coin { display: none; }
+        body.gamer .title-coin {
+            display: inline-block; animation: coinSpin 0.6s steps(4) infinite; font-size: 28px;
+        }
+        @keyframes coinSpin { 0% { transform: scaleX(1); } 25% { transform: scaleX(0.3); } 50% { transform: scaleX(1); } 75% { transform: scaleX(0.3); } }
+
+        .blink { animation: blinker 1s steps(1) infinite; }
+        @keyframes blinker { 0% { opacity: 1; } 50% { opacity: 0; } }
+
+        @keyframes dangerFlash { 0% { opacity: 1; } 50% { opacity: 0.6; } }
+
+        @keyframes cardPop {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .major-card { animation: cardPop 0.4s ease backwards; }
+        .major-card:nth-child(2) { animation-delay: 0.05s; }
+        .major-card:nth-child(3) { animation-delay: 0.1s; }
+        .major-card:nth-child(4) { animation-delay: 0.15s; }
+        .major-card:nth-child(5) { animation-delay: 0.2s; }
+        .major-card:nth-child(6) { animation-delay: 0.25s; }
+
+        @keyframes starPulse { 0% { transform: scale(1); } 50% { transform: scale(1.5); } 100% { transform: scale(1); } }
+
+
+        /* ╔═══════════════════════════════════════════════════════╗
+           ║  ██████  PROFESSOR THEME  ██████                     ║
+           ╚═══════════════════════════════════════════════════════╝ */
+        body.professor {
+            font-family: 'DM Sans', sans-serif;
+            background: #0a0c10;
+            color: #e8eaf0;
+            line-height: 1.6;
+        }
+
+        /* — Hero — */
+        body.professor .hero {
+            position: relative; z-index: 1; text-align: center;
+            padding: 80px 40px 60px; overflow: hidden;
+            border-bottom: 1px solid #2a3040;
+            background: #0a0c10;
+        }
+        body.professor .hero::before {
+            content: ''; position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+            width: 800px; height: 800px;
+            background: radial-gradient(circle, rgba(240,160,64,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        body.professor .hero::after { display: none; }
+        body.professor .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: #1a1e28; border: 1px solid #2a3040;
+            padding: 6px 16px; border-radius: 100px; font-size: 13px; color: #8890a4;
+        }
+        body.professor .hero-badge span { color: #f0a040; font-weight: 700; }
+        body.professor .hero h1 {
+            font-family: 'Fraunces', serif; font-size: clamp(2.4rem, 5vw, 3.8rem);
+            font-weight: 900; letter-spacing: -0.02em; line-height: 1.15; margin: 16px 0;
+            background: linear-gradient(135deg, #e8eaf0 0%, #f0a040 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        body.professor .hero p.hero-sub {
+            max-width: 640px; margin: 0 auto; color: #8890a4; font-size: 17px;
+            line-height: 1.6; text-shadow: none;
+        }
+        body.professor .hero-source {
+            margin-top: 20px; font-size: 12px; color: #5a6278;
+        }
+        body.professor .hero-source a { color: #60a5fa; text-decoration: none; }
+        body.professor .press-start { display: none; }
+
+        /* — Stats bar — */
+        body.professor .hud {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1px; background: #2a3040; border-bottom: 1px solid #2a3040;
+        }
+        body.professor .hud-item {
+            background: #13161d; padding: 24px 28px; text-align: center;
+            border-right: none;
+        }
+        body.professor .hud-value {
+            font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700;
+            color: #f0a040; text-shadow: none;
+        }
+        body.professor .hud-label {
+            font-size: 12px; color: #5a6278; text-transform: uppercase;
+            letter-spacing: 1.2px; margin-top: 4px; font-family: 'DM Sans', sans-serif;
+        }
+
+        /* — Controls — */
+        body.professor .controls {
+            padding: 28px 40px; background: #13161d;
+            border-bottom: 1px solid #2a3040;
+            display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;
+            position: relative; z-index: 1;
+        }
+        body.professor .controls label {
+            font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+            color: #5a6278; font-weight: 500;
+        }
+        body.professor .controls select,
+        body.professor .controls input[type="text"] {
+            background: #1a1e28; border: 1px solid #2a3040; color: #e8eaf0;
+            padding: 10px 14px; border-radius: 8px; font-family: 'DM Sans', sans-serif;
+            font-size: 14px; cursor: pointer; outline: none; transition: border-color 0.2s;
+        }
+        body.professor .controls select:focus,
+        body.professor .controls input:focus {
+            border-color: #f0a040; box-shadow: 0 0 0 3px rgba(240,160,64,0.15);
+        }
+        body.professor .view-toggle { border-radius: 8px; overflow: hidden; border: 1px solid #2a3040; }
+        body.professor .view-toggle button {
+            font-family: 'DM Sans', sans-serif; font-size: 13px;
+            background: #1a1e28; color: #8890a4; border: none; padding: 8px 14px; cursor: pointer;
+        }
+        body.professor .view-toggle button.active {
+            background: #f0a040; color: #0a0c10; font-weight: 700;
+        }
+        body.professor .compare-count {
+            background: #1a1e28; border: 1px solid #2a3040; padding: 6px 12px;
+            border-radius: 8px; font-size: 13px; color: #8890a4;
+        }
+        body.professor .compare-btn {
+            background: #f0a040; color: #0a0c10; border: none; padding: 10px 20px;
+            border-radius: 8px; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 14px;
+        }
+        body.professor .compare-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(240,160,64,0.15); }
+
+        /* — Content — */
+        body.professor .content {
+            padding: 32px 40px 80px; position: relative; z-index: 1;
+            background: transparent;
+        }
+        body.professor .major-grid {
+            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+        }
+
+        /* — Cards — */
+        body.professor .major-card {
+            background: #13161d; border: 1px solid #2a3040; border-radius: 12px;
+            overflow: hidden; transition: all 0.3s;
+        }
+        body.professor .major-card:hover {
+            border-color: rgba(240,160,64,0.3); transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        body.professor .major-card.selected {
+            border-color: #f0a040; box-shadow: 0 0 0 3px rgba(240,160,64,0.15);
+        }
+        body.professor .card-select {
+            position: absolute; top: 12px; right: 12px;
+            width: 24px; height: 24px; border-radius: 6px;
+            border: 2px solid #2a3040; background: #1a1e28;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 14px; color: transparent; z-index: 2; transition: all 0.2s;
+        }
+        body.professor .card-select:hover { border-color: #f0a040; }
+        body.professor .card-select.checked {
+            background: #f0a040; border-color: #f0a040; color: #0a0c10;
+        }
+        body.professor .card-header { padding: 24px 24px 16px; }
+        body.professor .card-header h2 {
+            font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700;
+            text-shadow: none; line-height: 1.3;
+        }
+        body.professor .college-tag {
+            font-size: 11px; padding: 4px 10px; border-radius: 100px; font-weight: 500;
+            border: none;
+        }
+        body.professor .college-tag.business { background: rgba(96,165,250,0.12); color: #60a5fa; }
+        body.professor .college-tag.arts { background: rgba(167,139,250,0.12); color: #a78bfa; }
+        body.professor .college-tag.health { background: rgba(52,211,153,0.12); color: #34d399; }
+        body.professor .card-desc {
+            padding: 0 24px 16px; font-size: 14px; color: #8890a4; line-height: 1.5;
+        }
+
+        /* — Career blocks — */
+        body.professor .career-block {
+            margin: 0 16px 16px; background: #1a1e28; border-radius: 8px;
+            overflow: hidden; border: none;
+        }
+        body.professor .career-header {
+            padding: 14px 16px; background: transparent;
+        }
+        body.professor .career-header:hover { background: #222833; }
+        body.professor .career-title {
+            font-weight: 700; font-size: 15px; color: #e8eaf0; line-height: 1.4;
+        }
+        body.professor .career-salary {
+            font-family: 'Fraunces', serif; font-weight: 700; font-size: 18px;
+            color: #34d399; text-shadow: none;
+        }
+        body.professor .career-expand-icon { color: #5a6278; font-size: 18px; }
+        body.professor .career-details-inner { padding: 0 16px 16px; }
+        body.professor .metric {
+            background: #13161d; padding: 10px 12px; border-radius: 8px; border: none;
+        }
+        body.professor .metric-value { font-weight: 700; font-size: 15px; }
+        body.professor .metric-label {
+            font-size: 11px; color: #5a6278; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        body.professor .salary-range-header { font-size: 12px; color: #5a6278; }
+        body.professor .salary-bar-bg {
+            height: 8px; background: #13161d; border-radius: 100px; overflow: hidden; border: none;
+        }
+        body.professor .salary-bar-fill {
+            height: 100%; border-radius: 100px;
+            background: linear-gradient(90deg, #f0a040, #34d399);
+            transition: width 0.6s ease;
+        }
+        body.professor .salary-bar-median {
+            width: 14px; height: 14px; background: #e8eaf0; border-radius: 50%;
+            border: 2px solid #1a1e28; top: -3px;
+        }
+
+        /* AI meters - professor */
+        body.professor .ai-impact-label { font-size: 12px; color: #5a6278; }
+        body.professor .ai-badge {
+            font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 100px; border: none;
+        }
+        body.professor .ai-badge.low { background: rgba(52,211,153,0.12); color: #34d399; }
+        body.professor .ai-badge.low-medium { background: rgba(52,211,153,0.08); color: #6ee7b7; }
+        body.professor .ai-badge.medium { background: rgba(251,191,36,0.12); color: #fbbf24; }
+        body.professor .ai-badge.medium-high { background: rgba(248,113,113,0.08); color: #fca5a5; }
+        body.professor .ai-badge.high { background: rgba(248,113,113,0.12); color: #f87171; }
+        body.professor .ai-meter {
+            height: 6px; background: #13161d; border-radius: 100px; overflow: hidden; border: none;
+        }
+        body.professor .ai-meter-fill { border-radius: 100px; transition: width 0.6s ease; }
+        body.professor .ai-meter-fill.low { background: #34d399; }
+        body.professor .ai-meter-fill.low-medium { background: #6ee7b7; }
+        body.professor .ai-meter-fill.medium { background: #fbbf24; }
+        body.professor .ai-meter-fill.medium-high { background: #fca5a5; }
+        body.professor .ai-meter-fill.high { background: #f87171; }
+        body.professor .ai-analysis {
+            font-size: 13px; color: #8890a4; line-height: 1.6;
+            padding: 12px; background: #13161d; border-radius: 8px;
+            border-left: 3px solid #f0a040;
+        }
+        body.professor .bls-link { font-size: 13px; color: #60a5fa; text-decoration: none; }
+        body.professor .bls-link:hover { color: #f0a040; text-decoration: underline; }
+
+        /* Scatter - professor */
+        body.professor .scatter-container {
+            background: #13161d; border: 1px solid #2a3040; border-radius: 12px; padding: 32px;
+        }
+        body.professor .scatter-title {
+            font-family: 'Fraunces', serif; font-size: 22px; color: #e8eaf0; text-shadow: none;
+        }
+        body.professor .scatter-subtitle { font-size: 14px; color: #8890a4; line-height: 1.6; }
+        body.professor .scatter-chart { border-color: #2a3040; }
+        body.professor .scatter-dot { border-radius: 50%; }
+        body.professor .scatter-tooltip {
+            background: #222833; border: 1px solid #2a3040; border-radius: 8px;
+            padding: 12px 16px; font-size: 13px; line-height: 1.6;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        body.professor .scatter-axis-label { font-size: 11px; color: #5a6278; }
+        body.professor .scatter-tick { font-size: 11px; color: #5a6278; }
+        body.professor .scatter-legend-item { font-size: 13px; color: #8890a4; }
+        body.professor .scatter-legend-dot { border-radius: 50%; }
+
+        /* Table - professor */
+        body.professor .data-table { background: #13161d; border-radius: 12px; overflow: hidden; border: none; }
+        body.professor .data-table th {
+            background: #1a1e28; padding: 14px 16px; font-size: 12px; color: #5a6278;
+            border-bottom: 1px solid #2a3040;
+        }
+        body.professor .data-table td {
+            padding: 14px 16px; border-bottom: 1px solid #2a3040; font-size: 14px;
+        }
+        body.professor .data-table tr:hover td { background: #1a1e28; }
+        body.professor .data-table .salary-col { color: #34d399; font-weight: 700; font-family: 'Fraunces', serif; }
+        body.professor .growth-positive { color: #34d399; }
+        body.professor .growth-negative { color: #f87171; }
+
+        /* Modal - professor */
+        body.professor .modal-overlay { background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); }
+        body.professor .modal {
+            background: #13161d; border: 1px solid #2a3040; border-radius: 12px;
+            max-width: 1100px; padding: 32px;
+        }
+        body.professor .modal-header h2 { font-family: 'Fraunces', serif; font-size: 24px; color: #e8eaf0; text-shadow: none; }
+        body.professor .modal-close {
+            background: #1a1e28; border: 1px solid #2a3040; color: #e8eaf0;
+            width: 36px; height: 36px; border-radius: 50%; font-family: 'DM Sans', sans-serif; font-size: 18px;
+        }
+        body.professor .modal-close:hover { background: rgba(248,113,113,0.12); border-color: #f87171; }
+        body.professor .compare-label { font-size: 12px; color: #5a6278; }
+        body.professor .compare-cell {
+            background: #1a1e28; border: none; border-radius: 8px; padding: 14px 16px;
+        }
+        body.professor .compare-cell.header {
+            background: #222833; font-family: 'Fraunces', serif; font-size: 16px;
+        }
+        body.professor .compare-cell .big { font-size: 20px; font-weight: 700; }
+        body.professor .compare-cell .sub { font-size: 12px; color: #5a6278; }
+
+        /* Footer - professor */
+        body.professor .game-footer {
+            text-align: center; padding: 40px; border-top: 1px solid #2a3040;
+            background: transparent; font-size: 12px; color: #5a6278; line-height: 1.7;
+            font-family: 'DM Sans', sans-serif;
+        }
+        body.professor .game-footer::before { display: none; }
+        body.professor .game-footer a { color: #60a5fa; }
+
+        body.professor ::-webkit-scrollbar { width: 8px; }
+        body.professor ::-webkit-scrollbar-track { background: #0a0c10; }
+        body.professor ::-webkit-scrollbar-thumb { background: #2a3040; border-radius: 4px; }
+
+
+        /* ╔═══════════════════════════════════════════════════════╗
+           ║  ██████  GAMER THEME  ██████                         ║
+           ╚═══════════════════════════════════════════════════════╝ */
+        body.gamer {
+            font-family: 'Press Start 2P', monospace;
+            background: #000; color: #fcfcfc;
+            image-rendering: pixelated;
+        }
+
+        /* — Hero — */
+        body.gamer .hero {
+            position: relative; z-index: 1; text-align: center;
+            padding: 60px 20px 40px; overflow: hidden;
+            background: linear-gradient(180deg, #000020 0%, #0000a0 40%, #5c94fc 70%, #5c94fc 100%);
+            border-bottom: 8px solid #c84c0c;
+        }
+        body.gamer .hero::before { display: none; }
+        body.gamer .hero::after {
+            content: ''; display: block; position: absolute; bottom: 0; left: 0; right: 0; height: 32px;
+            background:
+                repeating-linear-gradient(90deg, #c84c0c 0px, #c84c0c 30px, #a0440c 30px, #a0440c 32px),
+                repeating-linear-gradient(0deg, #c84c0c 0px, #c84c0c 14px, #a0440c 14px, #a0440c 16px);
+        }
+        body.gamer .hero-badge { display: none; }
+        body.gamer .hero h1 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(18px, 4vw, 36px); line-height: 1.6; margin: 20px 0 10px;
+            letter-spacing: 2px; background: none; -webkit-text-fill-color: unset;
+            color: #fcfcfc;
+            text-shadow: 4px 4px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+        }
+        body.gamer .hero h1 .word-bryant { color: #fca044; }
+        body.gamer .hero h1 .word-quest { color: #e40058; }
+        body.gamer .hero p.hero-sub {
+            font-size: 10px; color: #b8b8b8; max-width: 700px; margin: 16px auto 0;
+            line-height: 2; text-shadow: 2px 2px 0 #000;
+        }
+        body.gamer .hero-source { font-size: 7px; color: #686868; margin-top: 16px; }
+        body.gamer .hero-source a { color: #5c94fc; }
+        body.gamer .press-start {
+            font-size: 12px; color: #f8d800; text-shadow: 2px 2px 0 #000; margin-top: 24px;
+        }
+
+        /* — HUD — */
+        body.gamer .hud {
+            background: #000; border-bottom: 4px solid #4040a0;
+        }
+        body.gamer .hud-item {
+            padding: 16px 12px; border-right: 2px solid #1a1a40;
+        }
+        body.gamer .hud-item:last-child { border-right: none; }
+        body.gamer .hud-label {
+            font-size: 7px; color: #b8b8b8; letter-spacing: 1px;
+            font-family: 'Press Start 2P', monospace;
+        }
+        body.gamer .hud-value {
+            font-size: 16px; color: #fca044; text-shadow: 0 0 8px rgba(252,160,68,0.3);
+            font-family: 'Press Start 2P', monospace;
+        }
+
+        /* — Controls — */
+        body.gamer .controls {
+            padding: 20px; background: #181830; border-bottom: 4px solid #4040a0;
+            position: relative; z-index: 1;
+        }
+        body.gamer .controls label { font-size: 7px; color: #b8b8b8; letter-spacing: 1px; }
+        body.gamer .controls select,
+        body.gamer .controls input[type="text"] {
+            font-family: 'Press Start 2P', monospace; font-size: 9px;
+            background: #000; color: #fcfcfc;
+            border: 3px solid #4040a0; border-radius: 0; padding: 10px 12px;
+        }
+        body.gamer .controls select:focus,
+        body.gamer .controls input:focus {
+            border-color: #fca044; box-shadow: 0 0 0 2px rgba(252,160,68,0.3);
+        }
+        body.gamer .view-toggle { border-radius: 0; border: none; gap: 2px; }
+        body.gamer .view-toggle button {
+            font-family: 'Press Start 2P', monospace; font-size: 8px;
+            background: #282860; color: #b8b8b8; border: 3px solid #4040a0;
+            border-radius: 0; padding: 10px 14px;
+        }
+        body.gamer .view-toggle button.active {
+            background: #3c72e0; color: #fcfcfc; border-color: #8080ff;
+            box-shadow: inset -2px -2px 0 rgba(0,0,0,0.4), inset 2px 2px 0 rgba(255,255,255,0.15);
+        }
+        body.gamer .compare-count {
+            font-size: 8px; color: #fca044; padding: 6px 10px;
+            border: 2px solid #4040a0; background: #000; border-radius: 0;
+        }
+        body.gamer .compare-btn {
+            font-family: 'Press Start 2P', monospace; font-size: 9px;
+            background: #e40058; color: #fcfcfc; border: 3px solid #ff4080;
+            border-radius: 0; padding: 10px 16px;
+            box-shadow: inset -2px -2px 0 rgba(0,0,0,0.4), inset 2px 2px 0 rgba(255,255,255,0.2);
+        }
+        body.gamer .compare-btn:hover { transform: scale(1.05); }
+
+        /* — Content — */
+        body.gamer .content {
+            padding: 24px 20px 60px; position: relative; z-index: 1;
+            background: linear-gradient(180deg, #181830 0%, #000010 100%);
+        }
+        body.gamer .major-grid { grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); }
+
+        /* — Cards — */
+        body.gamer .major-card {
+            background: #202048; border: 4px solid #4040a0; border-radius: 0;
+        }
+        body.gamer .major-card:hover {
+            border-color: #fca044; box-shadow: 0 0 16px rgba(252,160,68,0.2); transform: translateY(-2px);
+        }
+        body.gamer .major-card.selected {
+            border-color: #f8d800; box-shadow: 0 0 24px rgba(248,216,0,0.25);
+        }
+        body.gamer .card-select {
+            position: absolute; top: 8px; right: 8px;
+            width: 28px; height: 28px; font-size: 18px; cursor: pointer;
+            text-align: center; line-height: 28px; z-index: 2; opacity: 0.4;
+            background: transparent; border: none; border-radius: 0;
+        }
+        body.gamer .card-select:hover { opacity: 1; transform: scale(1.2); }
+        body.gamer .card-select.checked { opacity: 1; color: inherit; background: transparent; border-color: transparent; }
+        body.gamer .card-header { padding: 16px 16px 10px; }
+        body.gamer .card-header h2 {
+            font-size: 12px; line-height: 1.6; text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+            font-family: 'Press Start 2P', monospace;
+        }
+        body.gamer .college-tag {
+            font-size: 6px; padding: 4px 8px; border: 2px solid; border-radius: 0;
+        }
+        body.gamer .college-tag.business { border-color: #5c94fc; color: #5c94fc; background: rgba(92,148,252,0.1); }
+        body.gamer .college-tag.arts { border-color: #c080ff; color: #c080ff; background: rgba(192,128,255,0.1); }
+        body.gamer .college-tag.health { border-color: #00a800; color: #00a800; background: rgba(0,168,0,0.1); }
+        body.gamer .card-desc { font-size: 8px; color: #b8b8b8; line-height: 2; padding: 0 16px 12px; }
+
+        /* — Career blocks — */
+        body.gamer .career-block {
+            margin: 0 10px 10px; border: 3px solid #00a800; background: #001800;
+            border-radius: 0;
+        }
+        body.gamer .career-header {
+            padding: 12px; background: linear-gradient(180deg, rgba(0,88,0,0.3), transparent);
+        }
+        body.gamer .career-header:hover { background: rgba(0,168,0,0.1); }
+        body.gamer .career-title { font-size: 9px; color: #00a800; line-height: 1.8; }
+        body.gamer .career-salary {
+            font-size: 14px; color: #fcfc54; text-shadow: 0 0 6px rgba(252,252,84,0.3);
+            font-family: 'Press Start 2P', monospace;
+        }
+        body.gamer .career-expand-icon { color: #00a800; }
+        body.gamer .career-details-inner { padding: 0 12px 12px; }
+        body.gamer .metric {
+            background: rgba(0,0,0,0.4); border: 2px solid #4040a0;
+            padding: 10px 6px; border-radius: 0;
+        }
+        body.gamer .metric-value { font-size: 11px; }
+        body.gamer .metric-label { font-size: 6px; color: #686868; }
+        body.gamer .salary-range-header { font-size: 7px; color: #686868; }
+        body.gamer .salary-bar-bg {
+            height: 12px; background: #000; border: 2px solid #4040a0; border-radius: 0;
+        }
+        body.gamer .salary-bar-fill {
+            background: repeating-linear-gradient(90deg, #fca044 0px, #fca044 6px, #fcfc54 6px, #fcfc54 8px);
+            border-radius: 0; transition: width 0.6s steps(20);
+        }
+        body.gamer .salary-bar-median {
+            width: 4px; border-radius: 0; background: #fcfcfc; border: none;
+            box-shadow: 0 0 4px #fcfcfc; top: -2px; height: calc(100% + 4px);
+        }
+
+        /* AI meters - gamer */
+        body.gamer .ai-impact-label { font-size: 7px; color: #686868; }
+        body.gamer .ai-badge { font-size: 7px; padding: 3px 8px; border: 2px solid; border-radius: 0; }
+        body.gamer .ai-badge.low { border-color: #00a800; color: #00a800; background: rgba(0,168,0,0.1); }
+        body.gamer .ai-badge.low-medium { border-color: #40d040; color: #40d040; }
+        body.gamer .ai-badge.medium { border-color: #f8d800; color: #f8d800; }
+        body.gamer .ai-badge.medium-high { border-color: #f89800; color: #f89800; }
+        body.gamer .ai-badge.high { border-color: #d82800; color: #d82800; background: rgba(216,40,0,0.1); }
+        body.gamer .ai-meter {
+            height: 10px; background: #000; border: 2px solid #4040a0; border-radius: 0;
+        }
+        body.gamer .ai-meter-fill { border-radius: 0; transition: width 0.6s steps(20); }
+        body.gamer .ai-meter-fill.low { background: #00a800; }
+        body.gamer .ai-meter-fill.low-medium { background: #40d040; }
+        body.gamer .ai-meter-fill.medium { background: #f8d800; }
+        body.gamer .ai-meter-fill.medium-high { background: #f89800; }
+        body.gamer .ai-meter-fill.high {
+            background: #d82800; animation: dangerFlash 1s steps(1) infinite;
+        }
+        body.gamer .ai-analysis {
+            font-size: 8px; color: #b8b8b8; line-height: 2.2;
+            padding: 10px; background: rgba(0,0,0,0.3);
+            border-left: 4px solid #f89800; border-radius: 0;
+        }
+        body.gamer .bls-link { font-size: 8px; color: #5c94fc; }
+        body.gamer .bls-link:hover { color: #fca044; }
+
+        /* Scatter - gamer */
+        body.gamer .scatter-container {
+            background: #202048; border: 4px solid #4040a0; border-radius: 0; padding: 20px;
+        }
+        body.gamer .scatter-title {
+            font-size: 14px; color: #fca044; text-shadow: 2px 2px 0 #000;
+            font-family: 'Press Start 2P', monospace;
+        }
+        body.gamer .scatter-subtitle { font-size: 8px; color: #b8b8b8; line-height: 2; }
+        body.gamer .scatter-chart { border-color: #6060c0; }
+        body.gamer .scatter-dot { border-radius: 0; }
+        body.gamer .scatter-tooltip {
+            background: #000; border: 3px solid #fca044; border-radius: 0;
+            padding: 12px; font-size: 8px; line-height: 2.2;
+        }
+        body.gamer .scatter-axis-label { font-size: 7px; color: #686868; }
+        body.gamer .scatter-tick { font-size: 7px; color: #686868; }
+        body.gamer .scatter-legend-item { font-size: 8px; color: #b8b8b8; }
+        body.gamer .scatter-legend-dot { border-radius: 0; }
+
+        /* Table - gamer */
+        body.gamer .data-table { border: 3px solid #4040a0; border-radius: 0; }
+        body.gamer .data-table th {
+            background: #282860; padding: 12px 10px; font-size: 7px; color: #b8b8b8;
+            border-bottom: 3px solid #4040a0;
+        }
+        body.gamer .data-table td { padding: 10px; border-bottom: 2px solid #282860; font-size: 8px; }
+        body.gamer .data-table tr:hover td { background: #202048; }
+        body.gamer .data-table .salary-col { color: #fcfc54; }
+        body.gamer .growth-positive { color: #00a800; }
+        body.gamer .growth-negative { color: #d82800; }
+
+        /* Modal - gamer */
+        body.gamer .modal-overlay { background: rgba(0,0,0,0.85); backdrop-filter: none; }
+        body.gamer .modal {
+            background: #181830; border: 4px solid #fca044; border-radius: 0;
+            box-shadow: 0 0 40px rgba(252,160,68,0.15);
+        }
+        body.gamer .modal-header { border-bottom: 3px solid #4040a0; }
+        body.gamer .modal-header h2 {
+            font-size: 14px; color: #e40058; text-shadow: 2px 2px 0 #000;
+            font-family: 'Press Start 2P', monospace;
+        }
+        body.gamer .modal-close {
+            font-family: 'Press Start 2P', monospace; background: #d82800;
+            border: 3px solid #ff4040; border-radius: 0; font-size: 10px;
+        }
+        body.gamer .compare-label { font-size: 7px; color: #686868; }
+        body.gamer .compare-cell {
+            background: #000; border: 2px solid #4040a0; border-radius: 0; padding: 12px 10px;
+        }
+        body.gamer .compare-cell.header { background: #282860; border-color: #6060c0; font-size: 10px; }
+        body.gamer .compare-cell .big { font-size: 14px; }
+        body.gamer .compare-cell .sub { font-size: 7px; color: #686868; }
+
+        /* Footer - gamer */
+        body.gamer .game-footer {
+            text-align: center; padding: 32px 20px 24px;
+            background: #c84c0c; border-top: 4px solid #a0440c;
+            font-size: 7px; color: rgba(255,255,255,0.5); line-height: 2.4;
+            font-family: 'Press Start 2P', monospace;
+        }
+        body.gamer .game-footer::before {
+            content: ''; display: block; position: absolute; top: 0; left: 0; right: 0; height: 20px;
+            background: repeating-linear-gradient(90deg, #c84c0c 0px, #c84c0c 30px, #a0440c 30px, #a0440c 32px);
+        }
+        body.gamer .game-footer a { color: #fcfc54; }
+
+        body.gamer ::-webkit-scrollbar { width: 8px; }
+        body.gamer ::-webkit-scrollbar-track { background: #000; }
+        body.gamer ::-webkit-scrollbar-thumb { background: #4040a0; }
+
+
+        /* ╔═══════════════════════════════════════════════════════╗
+           ║  SHARED LAYOUT                                       ║
+           ╚═══════════════════════════════════════════════════════╝ */
+        .hero { position: relative; z-index: 1; }
+        .hud {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            position: relative; z-index: 1;
+        }
+        .hud-item { text-align: center; }
+        .controls {
+            display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;
+            position: relative; z-index: 1;
+        }
+        .control-group { display: flex; flex-direction: column; gap: 4px; }
+        .search-box { flex: 1; min-width: 180px; }
+        .search-box input { width: 100%; }
+        .view-toggle { display: flex; }
+        .compare-toggle { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+        .compare-count { display: none; }
+        .compare-count.visible { display: block; }
+        .compare-btn { display: none; cursor: pointer; }
+        .compare-btn.visible { display: block; }
+        .major-grid { display: grid; gap: 16px; }
+        .major-card { position: relative; }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+        .college-tag { white-space: nowrap; }
+        .career-header { cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .career-title { flex: 1; }
+        .career-salary { white-space: nowrap; margin-left: 12px; }
+        .career-expand-icon { transition: transform 0.2s; margin-left: 10px; }
+        .career-block.expanded .career-expand-icon { transform: rotate(180deg); }
+        .career-details { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+        .career-block.expanded .career-details { max-height: 800px; }
+        .career-metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .salary-range { margin-bottom: 12px; }
+        .salary-range-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+        .salary-bar-bg { position: relative; overflow: hidden; }
+        .salary-bar-fill { height: 100%; }
+        .salary-bar-median { position: absolute; transform: translateX(-50%); }
+        .ai-impact-section { margin-top: 12px; }
+        .ai-impact-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .scatter-container { display: none; margin-bottom: 20px; }
+        .scatter-container.active { display: block; }
+        .scatter-chart { position: relative; width: 100%; height: 450px; overflow: hidden; }
+        .scatter-dot { position: absolute; cursor: pointer; transition: all 0.15s; }
+        .scatter-dot:hover { transform: scale(1.5); z-index: 10; }
+        .scatter-tooltip { display: none; position: absolute; z-index: 20; pointer-events: none; min-width: 200px; }
+        .scatter-tooltip.active { display: block; }
+        .scatter-axis-label { position: absolute; }
+        .scatter-axis-x { bottom: -28px; left: 50%; transform: translateX(-50%); }
+        .scatter-axis-y { top: 50%; left: -42px; transform: translateY(-50%) rotate(-90deg); white-space: nowrap; }
+        .scatter-tick { position: absolute; }
+        .scatter-legend { display: flex; gap: 16px; margin-top: 36px; flex-wrap: wrap; }
+        .scatter-legend-item { display: flex; align-items: center; gap: 8px; }
+        .scatter-legend-dot { width: 12px; height: 12px; }
+        .table-container { display: none; overflow-x: auto; }
+        .table-container.active { display: block; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th { text-align: left; cursor: pointer; user-select: none; white-space: nowrap; }
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 1000;
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal { max-width: 1100px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 24px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-close { cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .compare-grid { display: grid; gap: 12px; }
+        .compare-row {
+            display: grid; grid-template-columns: 130px repeat(var(--cols), 1fr);
+            gap: 8px; align-items: center;
+        }
+        .empty-state { text-align: center; padding: 60px 20px; }
+        .game-footer { position: relative; z-index: 1; }
+
+        @media (max-width: 768px) {
+            body.professor .hero { padding: 48px 20px 40px; }
+            body.professor .controls { padding: 20px; }
+            body.professor .content { padding: 20px; }
+            body.gamer .content { padding: 14px; }
+            .major-grid { grid-template-columns: 1fr !important; }
+            .career-metrics { grid-template-columns: 1fr !important; }
+            .compare-row { grid-template-columns: 90px repeat(var(--cols), 1fr); }
+            .scatter-chart { height: 300px !important; }
+        }
+    </style>
+</head>
+<body class="professor">
+
+<!-- Theme-specific overlays -->
+<div class="scanlines"></div>
+<div class="starfield" id="starfield"></div>
+
+<!-- ═══════ THEME TOGGLE ═══════ -->
+<div class="theme-toggle">
+    <button class="tog-professor" onclick="setTheme('professor')">🎓 Professor</button>
+    <button class="tog-gamer" onclick="setTheme('gamer')">🎮 Gamer</button>
+</div>
+
+<!-- ═══════ HERO ═══════ -->
+<div class="hero">
+    <div class="cloud gamer-only">☁</div>
+    <div class="cloud gamer-only">☁</div>
+    <div class="cloud gamer-only">☁</div>
+
+    <div class="gamer-only" style="margin-bottom:4px">
+        <span class="title-coin">🪙</span>
+        <span class="title-coin" style="animation-delay:0.15s">🪙</span>
+        <span class="title-coin" style="animation-delay:0.3s">🪙</span>
+    </div>
+
+    <div class="hero-badge professor-only">
+        <span>🎓</span> Bryant University Major Advisor
+    </div>
+
+    <h1 id="heroTitle">
+        <span class="word-bryant">Bryant</span> <span class="word-quest professor-only">University</span><span class="word-quest gamer-only">Quest</span><br>
+        <span id="heroSubtitle">Major Advisor</span>
+    </h1>
+
+    <p class="hero-sub" id="heroDesc">
+        Explore 31 Bryant University majors with real salary data, job growth projections from the Bureau of Labor Statistics, and an AI-readiness assessment for every career path.
+    </p>
+
+    <p class="press-start blink gamer-only">▼ SELECT YOUR MAJOR ▼</p>
+
+    <div class="hero-source">
+        <span class="professor-only">Data:</span><span class="gamer-only">DATA:</span>
+        <a href="https://www.bls.gov/ooh/" target="_blank">BLS<span class="professor-only">.gov</span><span class="gamer-only">.GOV</span></a> ·
+        <span class="professor-only">Programs:</span><span class="gamer-only">PROGRAMS:</span>
+        <a href="https://www.bryant.edu/undergraduate/academics/undergraduate-programs" target="_blank">Bryant<span class="professor-only">.edu</span><span class="gamer-only">.EDU</span></a>
+    </div>
+</div>
+
+<!-- ═══════ HUD / STATS ═══════ -->
+<div class="hud">
+    <div class="hud-item"><div class="hud-label" data-prof="Majors Tracked" data-game="MAJORS">Majors Tracked</div><div class="hud-value" id="statMajors">—</div></div>
+    <div class="hud-item"><div class="hud-label" data-prof="Career Paths" data-game="CAREERS">Career Paths</div><div class="hud-value" id="statCareers">—</div></div>
+    <div class="hud-item"><div class="hud-label" data-prof="Avg Median Salary" data-game="AVG SALARY">Avg Median Salary</div><div class="hud-value" id="statSalary">—</div></div>
+    <div class="hud-item"><div class="hud-label" data-prof="Avg Job Growth" data-game="AVG GROWTH">Avg Job Growth</div><div class="hud-value" id="statGrowth">—</div></div>
+    <div class="hud-item"><div class="hud-label" data-prof="Avg AI Exposure" data-game="AI EXPOSURE">Avg AI Exposure</div><div class="hud-value" id="statAI">—</div></div>
+</div>
+
+<!-- ═══════ CONTROLS ═══════ -->
+<div class="controls">
+    <div class="control-group">
+        <label data-prof="College" data-game="WORLD">College</label>
+        <select id="filterCollege">
+            <option value="">All Colleges</option>
+            <option value="College of Business">Business</option>
+            <option value="College of Arts & Sciences">Arts & Sciences</option>
+            <option value="School of Health & Behavioral Sciences">Health & BS</option>
+        </select>
+    </div>
+    <div class="control-group">
+        <label data-prof="Sort By" data-game="SORT">Sort By</label>
+        <select id="sortBy">
+            <option value="name">Name A–Z</option>
+            <option value="salary_high">Highest Salary</option>
+            <option value="salary_low">Lowest Salary</option>
+            <option value="growth">Fastest Growth</option>
+            <option value="ai_safe">Most AI-Resilient</option>
+            <option value="ai_risk">Most AI-Exposed</option>
+        </select>
+    </div>
+    <div class="control-group">
+        <label data-prof="AI Impact" data-game="DANGER">AI Impact</label>
+        <select id="filterAI">
+            <option value="">All Levels</option>
+            <option value="low" data-prof="Low (Most Safe)" data-game="★ SAFE">Low (Most Safe)</option>
+            <option value="low-medium">Low-Medium</option>
+            <option value="medium">Medium</option>
+            <option value="medium-high">Medium-High</option>
+            <option value="high" data-prof="High (Most Exposed)" data-game="☠ DANGER">High (Most Exposed)</option>
+        </select>
+    </div>
+    <div class="control-group search-box">
+        <label data-prof="Search" data-game="SEARCH">Search</label>
+        <input type="text" id="searchInput" placeholder="Search majors or careers…">
+    </div>
+    <div class="control-group">
+        <label data-prof="View" data-game="VIEW">View</label>
+        <div class="view-toggle">
+            <button class="active" data-view="cards">Cards</button>
+            <button data-view="table">Table</button>
+            <button data-view="scatter" data-prof="Chart" data-game="MAP">Chart</button>
+        </div>
+    </div>
+    <div class="compare-toggle">
+        <span class="compare-count" id="compareCount">0 selected</span>
+        <button class="compare-btn" id="compareBtn" onclick="openCompare()">Compare</button>
+    </div>
+</div>
+
+<!-- ═══════ CONTENT ═══════ -->
+<div class="content">
+    <div class="scatter-container" id="scatterView">
+        <div class="scatter-title" id="scatterTitle">Salary vs. AI Exposure</div>
+        <div class="scatter-subtitle" id="scatterSub">Each dot represents a career path. Larger dots = faster job growth. Hover for details.</div>
+        <div class="scatter-chart" id="scatterChart">
+            <div class="scatter-tooltip" id="scatterTooltip"></div>
+        </div>
+        <div class="scatter-legend">
+            <div class="scatter-legend-item"><div class="scatter-legend-dot" style="background:#60a5fa"></div> <span data-prof="College of Business" data-game="BUSINESS">College of Business</span></div>
+            <div class="scatter-legend-item"><div class="scatter-legend-dot" style="background:#a78bfa"></div> <span data-prof="Arts & Sciences" data-game="ARTS & SCI">Arts & Sciences</span></div>
+            <div class="scatter-legend-item"><div class="scatter-legend-dot" style="background:#34d399"></div> <span data-prof="Health & Behavioral Sciences" data-game="HEALTH & BS">Health & Behavioral Sciences</span></div>
+            <div class="scatter-legend-item"><span style="font-size:inherit;color:inherit" data-prof="Dot size = Job growth rate" data-game="BLOCK SIZE = GROWTH RATE">Dot size = Job growth rate</span></div>
+        </div>
+    </div>
+    <div class="table-container" id="tableView"></div>
+    <div class="major-grid" id="majorGrid"></div>
+</div>
+
+<!-- ═══════ COMPARE MODAL ═══════ -->
+<div class="modal-overlay" id="compareModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 id="compareTitle">Major Comparison</h2>
+            <button class="modal-close" onclick="closeCompare()">✕</button>
+        </div>
+        <div id="compareContent"></div>
+    </div>
+</div>
+
+<!-- ═══════ FOOTER ═══════ -->
+<div class="game-footer">
+    <span class="professor-only">Salary data from the</span>
+    <span class="gamer-only">© 2026 BRYANT QUEST · SALARY DATA FROM</span>
+    <a href="https://www.bls.gov/ooh/" target="_blank"><span class="professor-only">U.S. Bureau of Labor Statistics</span><span class="gamer-only">U.S. BUREAU OF LABOR STATISTICS</span></a>
+    <span class="professor-only">(2024 estimates).</span>
+    <span class="gamer-only">(2024 EST.)</span><br>
+    <span class="professor-only">Job growth projections are for 2023–2033. AI impact assessments are qualitative estimates and should be considered alongside personal interests, aptitudes, and goals.</span>
+    <span class="gamer-only">GROWTH: 2023-2033 · AI IMPACT SCORES ARE QUALITATIVE ESTIMATES</span><br>
+    <span class="professor-only">Programs listed from</span>
+    <span class="gamer-only">PROGRAMS:</span>
+    <a href="https://www.bryant.edu/undergraduate/academics/undergraduate-programs" target="_blank"><span class="professor-only">Bryant University Undergraduate Programs</span><span class="gamer-only">BRYANT UNIVERSITY UNDERGRADUATE</span></a><span class="professor-only">.</span>
+</div>
+
+<script>
+/* ═══════ THEME ENGINE ═══════ */
+let currentTheme = localStorage.getItem('bryantTheme') || 'professor';
+
+function setTheme(theme) {
+    currentTheme = theme;
+    document.body.className = theme;
+    localStorage.setItem('bryantTheme', theme);
+    updateThemeLabels();
+    renderCards(lastRenderedMajors);
+}
+
+function updateThemeLabels() {
+    const isGamer = currentTheme === 'gamer';
+    const key = isGamer ? 'game' : 'prof';
+
+    // Update all [data-prof] / [data-game] elements
+    document.querySelectorAll('[data-prof]').forEach(el => {
+        const val = el.getAttribute('data-' + key);
+        if (val) {
+            if (el.tagName === 'OPTION') el.textContent = val;
+            else if (el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'DIV') el.textContent = val;
+            else if (el.tagName === 'BUTTON') el.textContent = val;
+        }
+    });
+
+    // Hero description
+    document.getElementById('heroDesc').textContent = isGamer
+        ? 'EXPLORE 31 MAJORS · REAL BLS SALARY DATA · JOB GROWTH PROJECTIONS · AI IMPACT SCORES'
+        : 'Explore 31 Bryant University majors with real salary data, job growth projections from the Bureau of Labor Statistics, and an AI-readiness assessment for every career path.';
+
+    // Scatter labels
+    document.getElementById('scatterTitle').textContent = isGamer ? '⚔ SALARY vs AI DANGER MAP' : 'Salary vs. AI Exposure';
+    document.getElementById('scatterSub').textContent = isGamer
+        ? 'EACH BLOCK = A CAREER. BIGGER = FASTER GROWTH. HOVER FOR INTEL.'
+        : 'Each dot represents a career path. Larger dots = faster job growth. Hover for details.';
+
+    // Compare title
+    document.getElementById('compareTitle').textContent = isGamer ? '⚔ BOSS BATTLE: COMPARE MAJORS' : 'Major Comparison';
+
+    // Compare button text
+    document.getElementById('compareBtn').textContent = isGamer ? '⚔ BATTLE!' : 'Compare';
+
+    // Search placeholder
+    document.getElementById('searchInput').placeholder = isGamer ? 'FIND MAJOR...' : 'Search majors or careers…';
+}
+
+/* ═══════ Generate starfield ═══════ */
+(function() {
+    const sf = document.getElementById('starfield');
+    for (let i = 0; i < 120; i++) {
+        const s = document.createElement('div');
+        s.className = 'star';
+        s.style.left = Math.random() * 100 + '%';
+        s.style.top = Math.random() * 100 + '%';
+        s.style.animationDelay = (Math.random() * 3) + 's';
+        s.style.animationDuration = (1 + Math.random() * 3) + 's';
+        if (Math.random() > 0.7) { s.style.width = '3px'; s.style.height = '3px'; }
+        sf.appendChild(s);
+    }
+})();
+
+/* ═══════ DATA & STATE ═══════ */
+let allMajors = [];
+let lastRenderedMajors = [];
+let selectedIds = new Set();
+let currentView = 'cards';
+let scatterData = null;
+let scatterRendered = false;
+
+async function init() {
+    const [majorsRes, statsRes] = await Promise.all([
+        fetch('/api/majors?sort=name'),
+        fetch('/api/stats')
+    ]);
+    allMajors = await majorsRes.json();
+    const stats = await statsRes.json();
+
+    document.getElementById('statMajors').textContent = stats.total_majors;
+    document.getElementById('statCareers').textContent = stats.total_careers;
+    document.getElementById('statSalary').textContent = '$' + stats.avg_salary.toLocaleString();
+    document.getElementById('statGrowth').textContent = stats.avg_growth + '%';
+    document.getElementById('statAI').textContent = stats.avg_ai_score + '/100';
+
+    lastRenderedMajors = allMajors;
+    scatterData = stats.all_careers;
+    renderCards(allMajors);
+    renderTable(allMajors);
+
+    // Apply saved theme
+    setTheme(currentTheme);
+}
+
+function formatSalary(n) { return '$' + n.toLocaleString(); }
+
+function getCollegeClass(college) {
+    if (college.includes('Business')) return 'business';
+    if (college.includes('Arts')) return 'arts';
+    return 'health';
+}
+function getCollegeShort(college) {
+    const isGamer = currentTheme === 'gamer';
+    if (college.includes('Business')) return isGamer ? 'BUSINESS' : 'Business';
+    if (college.includes('Arts')) return isGamer ? 'ARTS&SCI' : 'Arts & Sci';
+    return isGamer ? 'HEALTH' : 'Health & BS';
+}
+function getAIClass(impact) { return impact.toLowerCase().replace(' ', '-'); }
+function getAIColor(score) {
+    if (score <= 25) return currentTheme === 'gamer' ? '#00a800' : '#34d399';
+    if (score <= 40) return currentTheme === 'gamer' ? '#40d040' : '#6ee7b7';
+    if (score <= 55) return currentTheme === 'gamer' ? '#f8d800' : '#fbbf24';
+    if (score <= 70) return currentTheme === 'gamer' ? '#f89800' : '#fca5a5';
+    return currentTheme === 'gamer' ? '#d82800' : '#f87171';
+}
+
+function t(prof, game) { return currentTheme === 'gamer' ? game : prof; }
+
+function renderCards(majors) {
+    lastRenderedMajors = majors;
+    const grid = document.getElementById('majorGrid');
+    const G = currentTheme === 'gamer';
+    if (majors.length === 0) {
+        grid.innerHTML = `<div class="empty-state"><h3>${G ? 'GAME OVER' : 'No majors found'}</h3><p>${G ? 'NO MAJORS FOUND.<br>TRY DIFFERENT FILTERS.' : 'Try adjusting your filters or search terms.'}</p></div>`;
+        return;
+    }
+    grid.innerHTML = majors.map(m => {
+        const name = G ? m.major.toUpperCase() : m.major;
+        const selIcon = G
+            ? (selectedIds.has(m.id) ? '⭐' : '☆')
+            : '✓';
+        return `
+        <div class="major-card ${selectedIds.has(m.id) ? 'selected' : ''}" data-id="${m.id}">
+            <div class="card-select ${selectedIds.has(m.id) ? 'checked' : ''}" onclick="toggleSelect(${m.id}, event)">${selIcon}</div>
+            <div class="card-header">
+                <h2>${name}</h2>
+                <span class="college-tag ${getCollegeClass(m.college)}">${getCollegeShort(m.college)}</span>
+            </div>
+            <div class="card-desc">${m.description}</div>
+            ${m.careers.map((c, i) => {
+                const cTitle = G ? c.title.toUpperCase() : c.title;
+                return `
+                <div class="career-block" id="career-${m.id}-${i}">
+                    <div class="career-header" onclick="toggleCareer('career-${m.id}-${i}')">
+                        <span class="career-title">${cTitle}</span>
+                        <span class="career-salary">${formatSalary(c.median_salary)}</span>
+                        <span class="career-expand-icon">${G ? '▼' : '▾'}</span>
+                    </div>
+                    <div class="career-details"><div class="career-details-inner">
+                        <div class="career-metrics">
+                            <div class="metric">
+                                <div class="metric-value" style="color:${c.growth_rate >= 0 ? getAIColor(0) : getAIColor(100)}">${c.growth_rate >= 0 ? '+' : ''}${c.growth_rate}%</div>
+                                <div class="metric-label">${t('10yr Growth','10YR GROWTH')}</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">${c.total_employment.toLocaleString()}</div>
+                                <div class="metric-label">${t('Total Jobs','TOTAL JOBS')}</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">${c.annual_openings.toLocaleString()}</div>
+                                <div class="metric-label">${t('Openings/Year','OPENINGS/YR')}</div>
+                            </div>
+                        </div>
+                        <div class="salary-range">
+                            <div class="salary-range-header">
+                                <span>${t('Entry:','LVL 1:')} ${formatSalary(c.entry_salary)}</span>
+                                <span>${t('Top:','MAX LVL:')} ${formatSalary(c.top_salary)}</span>
+                            </div>
+                            <div class="salary-bar-bg">
+                                <div class="salary-bar-fill" style="width:${(c.top_salary / 350000) * 100}%"></div>
+                                <div class="salary-bar-median" style="left:${(c.median_salary / 350000) * 100}%"></div>
+                            </div>
+                        </div>
+                        <div class="ai-impact-section">
+                            <div class="ai-impact-header">
+                                <span class="ai-impact-label">${t('AI Disruption Risk','🤖 AI DANGER LEVEL')}</span>
+                                <span class="ai-badge ${getAIClass(c.ai_impact)}">${G ? c.ai_impact.toUpperCase() : c.ai_impact} (${c.ai_impact_score}/100)</span>
+                            </div>
+                            <div class="ai-meter">
+                                <div class="ai-meter-fill ${getAIClass(c.ai_impact)}" style="width:${c.ai_impact_score}%"></div>
+                            </div>
+                            <div class="ai-analysis">${c.ai_analysis}</div>
+                        </div>
+                        <a class="bls-link" href="${c.bls_url}" target="_blank">${t('📊 View full BLS data →','📊 VIEW FULL BLS DATA →')}</a>
+                    </div></div>
+                </div>`;
+            }).join('')}
+        </div>`;
+    }).join('');
+}
+
+function toggleCareer(id) { document.getElementById(id).classList.toggle('expanded'); }
+
+function toggleSelect(id, e) {
+    e.stopPropagation();
+    if (selectedIds.has(id)) selectedIds.delete(id);
+    else { if (selectedIds.size >= 4) { alert(currentTheme === 'gamer' ? 'MAX 4 PLAYERS!' : 'You can compare up to 4 majors.'); return; } selectedIds.add(id); }
+    updateCompareUI();
+    renderCards(lastRenderedMajors);
+}
+
+function updateCompareUI() {
+    const n = selectedIds.size;
+    document.getElementById('compareBtn').classList.toggle('visible', n >= 2);
+    const cnt = document.getElementById('compareCount');
+    cnt.classList.toggle('visible', n > 0);
+    cnt.textContent = n + (currentTheme === 'gamer' ? ' SELECTED' : ' selected');
+}
+
+async function openCompare() {
+    const ids = [...selectedIds];
+    const res = await fetch('/api/compare?ids=' + ids.join('&ids='));
+    const data = await res.json();
+    const cols = data.length;
+    const G = currentTheme === 'gamer';
+    const content = document.getElementById('compareContent');
+    let html = `<div class="compare-grid" style="--cols:${cols}">`;
+    html += `<div class="compare-row"><div class="compare-label">${t('Major','PLAYER')}</div>${data.map(m =>
+        `<div class="compare-cell header">${G ? m.major.toUpperCase() : m.major}</div>`).join('')}</div>`;
+    html += `<div class="compare-row"><div class="compare-label">${t('College','WORLD')}</div>${data.map(m =>
+        `<div class="compare-cell"><span class="college-tag ${getCollegeClass(m.college)}">${getCollegeShort(m.college)}</span></div>`).join('')}</div>`;
+    html += `<div class="compare-row"><div class="compare-label">${t('Top Salary','GOLD')}</div>${data.map(m => {
+        const best = m.careers.reduce((a, b) => a.median_salary > b.median_salary ? a : b);
+        return `<div class="compare-cell"><div class="big" style="color:${getAIColor(0)}">${formatSalary(best.median_salary)}</div><div class="sub">${G ? best.title.toUpperCase() : best.title}</div></div>`;
+    }).join('')}</div>`;
+    html += `<div class="compare-row"><div class="compare-label">${t('Best Growth','POWER-UP')}</div>${data.map(m => {
+        const best = m.careers.reduce((a, b) => a.growth_rate > b.growth_rate ? a : b);
+        return `<div class="compare-cell"><div class="big" style="color:${best.growth_rate >= 0 ? getAIColor(0) : getAIColor(100)}">${best.growth_rate >= 0 ? '+' : ''}${best.growth_rate}%</div><div class="sub">${G ? best.growth_label.toUpperCase() : best.growth_label}</div></div>`;
+    }).join('')}</div>`;
+    html += `<div class="compare-row"><div class="compare-label">${t('AI Resilience','DEFENSE')}</div>${data.map(m => {
+        const safest = m.careers.reduce((a, b) => a.ai_impact_score < b.ai_impact_score ? a : b);
+        return `<div class="compare-cell"><div class="big" style="color:${getAIColor(safest.ai_impact_score)}">${safest.ai_impact_score}/100</div><div class="sub">${G ? safest.ai_impact.toUpperCase() : safest.ai_impact}</div></div>`;
+    }).join('')}</div>`;
+    html += `<div class="compare-row"><div class="compare-label">${t('Annual Openings','SPAWNS/YR')}</div>${data.map(m => {
+        const total = m.careers.reduce((s, c) => s + c.annual_openings, 0);
+        return `<div class="compare-cell"><div class="big">${total.toLocaleString()}</div><div class="sub">${t('per year','JOB OPENINGS')}</div></div>`;
+    }).join('')}</div>`;
+    html += '</div>';
+    content.innerHTML = html;
+    document.getElementById('compareModal').classList.add('active');
+}
+function closeCompare() { document.getElementById('compareModal').classList.remove('active'); }
+
+function renderScatter(careers) {
+    const chart = document.getElementById('scatterChart');
+    // Clear any previous render
+    const tooltip = document.getElementById('scatterTooltip');
+    chart.innerHTML = '';
+    chart.appendChild(tooltip);
+
+    const maxSalary = 250000;
+    // Padding: left for Y labels, top/right for breathing room, bottom for X labels
+    const padLeft = 70;
+    const padTop = 20;
+    const padRight = 20;
+    const padBottom = 36;
+    const totalW = chart.clientWidth;
+    const totalH = chart.clientHeight;
+    const plotW = totalW - padLeft - padRight;
+    const plotH = totalH - padTop - padBottom;
+
+    // Y-axis gridlines + labels
+    for (let i = 0; i <= 4; i++) {
+        const y = padTop + (plotH / 4) * i;
+        const salary = maxSalary - (maxSalary / 4) * i;
+        const line = document.createElement('div');
+        line.style.cssText = `position:absolute;left:${padLeft}px;right:${padRight}px;top:${y}px;height:1px;background:currentColor;opacity:0.15;`;
+        chart.appendChild(line);
+        const tick = document.createElement('div');
+        tick.className = 'scatter-tick';
+        tick.style.cssText = `left:0;width:${padLeft - 8}px;text-align:right;top:${y - 7}px;`;
+        tick.textContent = '$' + (salary / 1000) + 'K';
+        chart.appendChild(tick);
+    }
+
+    // X-axis gridlines + labels
+    for (let i = 0; i <= 4; i++) {
+        const x = padLeft + (plotW / 4) * i;
+        const score = Math.round((100 / 4) * i);
+        const line = document.createElement('div');
+        line.style.cssText = `position:absolute;top:${padTop}px;bottom:${padBottom}px;left:${x}px;width:1px;background:currentColor;opacity:0.15;`;
+        chart.appendChild(line);
+        const tick = document.createElement('div');
+        tick.className = 'scatter-tick';
+        tick.style.cssText = `left:${x - 12}px;bottom:${padBottom - 22}px;width:24px;text-align:center;`;
+        tick.textContent = score;
+        chart.appendChild(tick);
+    }
+
+    // Axis border lines
+    const yAxis = document.createElement('div');
+    yAxis.style.cssText = `position:absolute;left:${padLeft}px;top:${padTop}px;bottom:${padBottom}px;width:2px;background:currentColor;opacity:0.25;`;
+    chart.appendChild(yAxis);
+    const xAxis = document.createElement('div');
+    xAxis.style.cssText = `position:absolute;left:${padLeft}px;right:${padRight}px;top:${padTop + plotH}px;height:2px;background:currentColor;opacity:0.25;`;
+    chart.appendChild(xAxis);
+
+    // Axis labels
+    const xLabel = document.createElement('div');
+    xLabel.className = 'scatter-tick';
+    xLabel.style.cssText = `left:${padLeft}px;right:${padRight}px;bottom:0;text-align:center;`;
+    xLabel.textContent = 'AI Impact Score →';
+    chart.appendChild(xLabel);
+
+    const yLabel = document.createElement('div');
+    yLabel.className = 'scatter-tick';
+    yLabel.style.cssText = `left:0;top:50%;transform:rotate(-90deg) translateX(-50%);transform-origin:0 0;white-space:nowrap;`;
+    yLabel.textContent = '← Salary';
+    chart.appendChild(yLabel);
+
+    // Dots
+    careers.forEach(c => {
+        const x = padLeft + (c.ai_impact_score / 100) * plotW;
+        const y = padTop + ((maxSalary - c.median_salary) / maxSalary) * plotH;
+        const size = Math.max(10, Math.min(30, 8 + c.growth_rate * 0.7));
+        let color = '#60a5fa';
+        if (c.major.includes('History') || c.major.includes('Literary') || c.major.includes('Spanish') || c.major.includes('Arts') || c.major.includes('Politics') || c.major.includes('Sociology') || c.major.includes('Sports') || c.major.includes('Communication') || c.major.includes('Actuarial') || c.major.includes('Applied Math') || c.major.includes('Business Econ'))
+            color = '#a78bfa';
+        if (c.major.includes('Biology') || c.major.includes('Health') || c.major.includes('Exercise') || c.major.includes('Psychology'))
+            color = '#34d399';
+        const dot = document.createElement('div');
+        dot.className = 'scatter-dot';
+        dot.style.cssText = `left:${x - size/2}px;top:${y - size/2}px;width:${size}px;height:${size}px;background:${color};opacity:0.85;`;
+        dot.addEventListener('mouseenter', () => {
+            tooltip.innerHTML = `<strong>${c.career}</strong><br><span style="opacity:0.7">${c.major}</span><br>Salary: <strong>${formatSalary(c.median_salary)}</strong><br>Growth: <strong>${c.growth_rate}%</strong> · AI: <strong style="color:${getAIColor(c.ai_impact_score)}">${c.ai_impact_score}/100</strong>`;
+            tooltip.classList.add('active');
+            const tipX = (x + size + 8 + 220 > totalW) ? x - 230 : x + size + 8;
+            tooltip.style.left = tipX + 'px';
+            tooltip.style.top = Math.max(0, y - 30) + 'px';
+        });
+        dot.addEventListener('mouseleave', () => { tooltip.classList.remove('active'); });
+        chart.appendChild(dot);
+    });
+}
+
+function renderTable(majors) {
+    const container = document.getElementById('tableView');
+    let rows = [];
+    majors.forEach(m => { m.careers.forEach(c => { rows.push({ major: m.major, college: m.college, ...c }); }); });
+    const G = currentTheme === 'gamer';
+    container.innerHTML = `
+        <table class="data-table">
+            <thead><tr>
+                <th>${t('Major','MAJOR')}</th><th>${t('Career Path','CAREER')}</th><th>${t('Median Salary','SALARY')}</th>
+                <th>${t('Entry Salary','ENTRY')}</th><th>${t('Top Salary','MAX')}</th><th>${t('10yr Growth','GROWTH')}</th>
+                <th>${t('Annual Openings','OPENINGS')}</th><th>${t('AI Risk','AI')}</th>
+            </tr></thead>
+            <tbody>${rows.map(r => `<tr>
+                <td><strong>${G ? r.major.toUpperCase() : r.major}</strong></td>
+                <td>${G ? r.title.toUpperCase() : r.title}</td>
+                <td class="salary-col">${formatSalary(r.median_salary)}</td>
+                <td style="opacity:0.6">${formatSalary(r.entry_salary)}</td>
+                <td style="opacity:0.6">${formatSalary(r.top_salary)}</td>
+                <td class="${r.growth_rate >= 0 ? 'growth-positive' : 'growth-negative'}">${r.growth_rate >= 0 ? '+' : ''}${r.growth_rate}%</td>
+                <td>${r.annual_openings.toLocaleString()}</td>
+                <td><span class="ai-badge ${getAIClass(r.ai_impact)}">${r.ai_impact_score}</span></td>
+            </tr>`).join('')}</tbody>
+        </table>`;
+}
+
+// View switching
+document.querySelectorAll('.view-toggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentView = btn.dataset.view;
+        document.getElementById('majorGrid').style.display = currentView === 'cards' ? 'grid' : 'none';
+        document.getElementById('tableView').classList.toggle('active', currentView === 'table');
+        document.getElementById('scatterView').classList.toggle('active', currentView === 'scatter');
+        if (currentView === 'scatter' && scatterData && !scatterRendered) {
+            // Small delay to ensure container is visible and has dimensions
+            requestAnimationFrame(() => { renderScatter(scatterData); scatterRendered = true; });
+        }
+    });
+});
+
+// Filters
+async function applyFilters() {
+    const college = document.getElementById('filterCollege').value;
+    const sort = document.getElementById('sortBy').value;
+    const ai = document.getElementById('filterAI').value;
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const params = new URLSearchParams();
+    if (college) params.set('college', college);
+    if (sort) params.set('sort', sort);
+    if (ai) params.set('ai_impact', ai);
+    const res = await fetch('/api/majors?' + params.toString());
+    let data = await res.json();
+    if (search) {
+        data = data.filter(m =>
+            m.major.toLowerCase().includes(search) ||
+            m.description.toLowerCase().includes(search) ||
+            m.careers.some(c => c.title.toLowerCase().includes(search))
+        );
+    }
+    renderCards(data);
+    renderTable(data);
+}
+
+document.getElementById('filterCollege').addEventListener('change', applyFilters);
+document.getElementById('sortBy').addEventListener('change', applyFilters);
+document.getElementById('filterAI').addEventListener('change', applyFilters);
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+document.getElementById('compareModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('compareModal')) closeCompare();
+});
+
+init();
+</script>
+</body>
+</html>

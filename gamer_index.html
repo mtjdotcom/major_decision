@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRYANT QUEST — Choose Your Major!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #000000;
+            --sky: #5c94fc;
+            --ground: #c84c0c;
+            --brick: #a0440c;
+            --pipe-green: #00a800;
+            --pipe-dark: #005800;
+            --coin: #fca044;
+            --coin-bright: #fcfc54;
+            --mario-red: #e40058;
+            --star-yellow: #f8d800;
+            --cloud-white: #fcfcfc;
+            --text: #fcfcfc;
+            --text-dim: #b8b8b8;
+            --text-dark: #686868;
+            --question: #f89800;
+            --blue-block: #3c72e0;
+            --danger-red: #d82800;
+            --safe-green: #00a800;
+            --mid-yellow: #f8d800;
+            --surface: #181830;
+            --surface-2: #202048;
+            --surface-3: #282860;
+            --border: #4040a0;
+            --border-light: #6060c0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Press Start 2P', monospace;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            image-rendering: pixelated;
+            overflow-x: hidden;
+        }
+
+        /* CRT SCANLINE OVERLAY */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0,0,0,0.12) 0px,
+                rgba(0,0,0,0.12) 1px,
+                transparent 1px,
+                transparent 3px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ANIMATED STARS BG */
+        .starfield {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .star {
+            position: absolute;
+            background: var(--text);
+            width: 2px; height: 2px;
+            animation: twinkle 2s infinite alternate;
+        }
+        @keyframes twinkle {
+            0% { opacity: 0.2; }
+            100% { opacity: 1; }
+        }
+
+        /* HERO — TITLE SCREEN */
+        .hero {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 60px 20px 40px;
+            background:
+                linear-gradient(180deg, #000020 0%, #0000a0 40%, var(--sky) 70%, var(--sky) 100%);
+            border-bottom: 8px solid var(--ground);
+            overflow: hidden;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 32px;
+            background:
+                repeating-linear-gradient(90deg,
+                    var(--ground) 0px, var(--ground) 30px,
+                    var(--brick) 30px, var(--brick) 32px
+                ),
+                repeating-linear-gradient(0deg,
+                    var(--ground) 0px, var(--ground) 14px,
+                    var(--brick) 14px, var(--brick) 16px
+                );
+        }
+
+        .cloud {
+            position: absolute;
+            font-size: 40px;
+            opacity: 0.6;
+            animation: floatCloud 30s linear infinite;
+            filter: drop-shadow(0 2px 0 rgba(0,0,0,0.2));
+        }
+        .cloud:nth-child(1) { top: 30px; left: -100px; animation-duration: 40s; font-size: 30px; }
+        .cloud:nth-child(2) { top: 80px; left: -200px; animation-duration: 55s; animation-delay: -20s; }
+        .cloud:nth-child(3) { top: 55px; left: -150px; animation-duration: 48s; animation-delay: -10s; font-size: 25px; }
+        @keyframes floatCloud {
+            from { transform: translateX(-100px); }
+            to { transform: translateX(calc(100vw + 200px)); }
+        }
+
+        .title-coin {
+            display: inline-block;
+            animation: coinSpin 0.6s steps(4) infinite;
+            font-size: 28px;
+        }
+        @keyframes coinSpin {
+            0% { transform: scaleX(1); }
+            25% { transform: scaleX(0.3); }
+            50% { transform: scaleX(1); }
+            75% { transform: scaleX(0.3); }
+        }
+
+        .hero h1 {
+            font-size: clamp(18px, 4vw, 36px);
+            color: var(--text);
+            text-shadow:
+                4px 4px 0 #000,
+                -1px -1px 0 #000,
+                1px -1px 0 #000,
+                -1px 1px 0 #000;
+            line-height: 1.6;
+            margin: 20px 0 10px;
+            letter-spacing: 2px;
+        }
+        .hero h1 .word-bryant {
+            color: var(--coin);
+            text-shadow: 4px 4px 0 #000, 0 0 20px rgba(252,160,68,0.4);
+        }
+        .hero h1 .word-quest {
+            color: var(--mario-red);
+            text-shadow: 4px 4px 0 #000, 0 0 20px rgba(228,0,88,0.3);
+        }
+
+        .hero-sub {
+            font-size: 10px;
+            color: var(--text-dim);
+            max-width: 700px;
+            margin: 16px auto 0;
+            line-height: 2;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .blink { animation: blinker 1s steps(1) infinite; }
+        @keyframes blinker { 0% { opacity: 1; } 50% { opacity: 0; } }
+        .press-start {
+            margin-top: 24px;
+            font-size: 12px;
+            color: var(--star-yellow);
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .hero-source { margin-top: 16px; font-size: 7px; color: var(--text-dark); }
+        .hero-source a { color: var(--sky); text-decoration: none; }
+
+        /* HUD / STATS BAR */
+        .hud {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            background: #000;
+            border-bottom: 4px solid var(--border);
+            position: relative;
+            z-index: 1;
+        }
+        .hud-item {
+            padding: 16px 12px;
+            text-align: center;
+            border-right: 2px solid #1a1a40;
+        }
+        .hud-item:last-child { border-right: none; }
+        .hud-label { font-size: 7px; color: var(--text-dim); margin-bottom: 8px; letter-spacing: 1px; }
+        .hud-value { font-size: 16px; color: var(--coin); text-shadow: 0 0 8px rgba(252,160,68,0.3); }
+
+        /* CONTROLS */
+        .controls {
+            position: relative;
+            z-index: 1;
+            padding: 20px;
+            background: var(--surface);
+            border-bottom: 4px solid var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            align-items: flex-end;
+        }
+        .control-group { display: flex; flex-direction: column; gap: 6px; }
+        .control-group label { font-size: 7px; color: var(--text-dim); letter-spacing: 1px; }
+        .controls select, .controls input[type="text"] {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 9px;
+            background: #000;
+            color: var(--text);
+            border: 3px solid var(--border);
+            padding: 10px 12px;
+            cursor: pointer;
+            outline: none;
+        }
+        .controls select:focus, .controls input:focus {
+            border-color: var(--coin);
+            box-shadow: 0 0 0 2px rgba(252,160,68,0.3);
+        }
+        .search-box { flex: 1; min-width: 180px; }
+        .search-box input { width: 100%; }
+
+        .view-toggle { display: flex; gap: 2px; }
+        .view-toggle button {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
+            background: var(--surface-3);
+            color: var(--text-dim);
+            border: 3px solid var(--border);
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        .view-toggle button:hover { background: var(--surface-2); color: var(--text); }
+        .view-toggle button.active {
+            background: var(--blue-block);
+            color: var(--text);
+            border-color: #8080ff;
+            box-shadow: inset -2px -2px 0 rgba(0,0,0,0.4), inset 2px 2px 0 rgba(255,255,255,0.15);
+        }
+
+        .compare-toggle { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+        .compare-count {
+            font-size: 8px; color: var(--coin); padding: 6px 10px;
+            border: 2px solid var(--border); background: #000; display: none;
+        }
+        .compare-count.visible { display: block; }
+        .compare-btn {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 9px;
+            background: var(--mario-red);
+            color: var(--text);
+            border: 3px solid #ff4080;
+            padding: 10px 16px;
+            cursor: pointer;
+            display: none;
+            box-shadow: inset -2px -2px 0 rgba(0,0,0,0.4), inset 2px 2px 0 rgba(255,255,255,0.2);
+            transition: transform 0.1s;
+        }
+        .compare-btn:hover { transform: scale(1.05); }
+        .compare-btn:active { transform: scale(0.95); }
+        .compare-btn.visible { display: block; }
+
+        /* CONTENT */
+        .content {
+            position: relative;
+            z-index: 1;
+            padding: 24px 20px 60px;
+            background: linear-gradient(180deg, var(--surface) 0%, #000010 100%);
+            min-height: 60vh;
+        }
+        .major-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(440px, 1fr));
+            gap: 16px;
+        }
+
+        /* MAJOR CARD */
+        .major-card {
+            background: var(--surface-2);
+            border: 4px solid var(--border);
+            position: relative;
+            animation: cardPop 0.3s ease backwards;
+            transition: all 0.15s;
+        }
+        .major-card:nth-child(2) { animation-delay: 0.05s; }
+        .major-card:nth-child(3) { animation-delay: 0.1s; }
+        .major-card:nth-child(4) { animation-delay: 0.15s; }
+        .major-card:nth-child(5) { animation-delay: 0.2s; }
+        .major-card:nth-child(6) { animation-delay: 0.25s; }
+        @keyframes cardPop {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .major-card:hover {
+            border-color: var(--coin);
+            box-shadow: 0 0 16px rgba(252,160,68,0.2);
+            transform: translateY(-2px);
+        }
+        .major-card.selected {
+            border-color: var(--star-yellow);
+            box-shadow: 0 0 24px rgba(248,216,0,0.25);
+        }
+
+        .card-select {
+            position: absolute;
+            top: 8px; right: 8px;
+            width: 28px; height: 28px;
+            font-size: 18px;
+            cursor: pointer;
+            text-align: center;
+            line-height: 28px;
+            z-index: 2;
+            opacity: 0.4;
+            transition: all 0.15s;
+        }
+        .card-select:hover { opacity: 1; transform: scale(1.2); }
+        .card-select.checked { opacity: 1; animation: starPulse 0.5s ease; }
+        @keyframes starPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.5); }
+            100% { transform: scale(1); }
+        }
+
+        .card-header {
+            padding: 16px 16px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .card-header h2 {
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--text);
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+        }
+
+        .college-tag {
+            font-size: 6px; padding: 4px 8px; border: 2px solid;
+            white-space: nowrap; letter-spacing: 0.5px;
+        }
+        .college-tag.business { border-color: var(--sky); color: var(--sky); background: rgba(92,148,252,0.1); }
+        .college-tag.arts { border-color: #c080ff; color: #c080ff; background: rgba(192,128,255,0.1); }
+        .college-tag.health { border-color: var(--safe-green); color: var(--safe-green); background: rgba(0,168,0,0.1); }
+
+        .card-desc {
+            padding: 0 16px 12px;
+            font-size: 8px;
+            color: var(--text-dim);
+            line-height: 2;
+        }
+
+        /* CAREER BLOCK — PIPE STYLE */
+        .career-block {
+            margin: 0 10px 10px;
+            border: 3px solid var(--pipe-green);
+            background: #001800;
+            overflow: hidden;
+        }
+        .career-header {
+            padding: 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.15s;
+            background: linear-gradient(180deg, rgba(0,88,0,0.3), transparent);
+        }
+        .career-header:hover { background: rgba(0,168,0,0.1); }
+        .career-title { font-size: 9px; color: var(--safe-green); line-height: 1.8; flex: 1; }
+        .career-salary {
+            font-size: 14px; color: var(--coin-bright);
+            text-shadow: 0 0 6px rgba(252,252,84,0.3); white-space: nowrap;
+        }
+        .career-expand-icon {
+            color: var(--pipe-green); font-size: 12px; transition: transform 0.2s;
+        }
+        .career-block.expanded .career-expand-icon { transform: rotate(180deg); }
+
+        .career-details { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+        .career-block.expanded .career-details { max-height: 800px; }
+        .career-details-inner { padding: 0 12px 12px; }
+
+        .career-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .metric {
+            background: rgba(0,0,0,0.4);
+            border: 2px solid var(--border);
+            padding: 10px 6px;
+            text-align: center;
+        }
+        .metric-value { font-size: 11px; }
+        .metric-label { font-size: 6px; color: var(--text-dark); margin-top: 6px; letter-spacing: 0.5px; }
+
+        .salary-range { margin-bottom: 12px; }
+        .salary-range-header {
+            display: flex; justify-content: space-between;
+            font-size: 7px; color: var(--text-dark); margin-bottom: 6px;
+        }
+        .salary-bar-bg {
+            height: 12px; background: #000;
+            border: 2px solid var(--border);
+            position: relative; overflow: hidden;
+        }
+        .salary-bar-fill {
+            height: 100%;
+            background: repeating-linear-gradient(
+                90deg, var(--coin) 0px, var(--coin) 6px, var(--coin-bright) 6px, var(--coin-bright) 8px
+            );
+            transition: width 0.6s steps(20);
+        }
+        .salary-bar-median {
+            position: absolute; top: -2px;
+            width: 4px; height: calc(100% + 4px);
+            background: var(--text);
+            transform: translateX(-50%);
+            box-shadow: 0 0 4px var(--text);
+        }
+
+        /* AI IMPACT — DANGER METER */
+        .ai-impact-section { margin-top: 12px; }
+        .ai-impact-header {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 8px;
+        }
+        .ai-impact-label { font-size: 7px; color: var(--text-dark); letter-spacing: 0.5px; }
+        .ai-badge { font-size: 7px; padding: 3px 8px; border: 2px solid; }
+        .ai-badge.low { border-color: var(--safe-green); color: var(--safe-green); background: rgba(0,168,0,0.1); }
+        .ai-badge.low-medium { border-color: #40d040; color: #40d040; background: rgba(64,208,64,0.08); }
+        .ai-badge.medium { border-color: var(--mid-yellow); color: var(--mid-yellow); background: rgba(248,216,0,0.08); }
+        .ai-badge.medium-high { border-color: var(--question); color: var(--question); background: rgba(248,152,0,0.08); }
+        .ai-badge.high { border-color: var(--danger-red); color: var(--danger-red); background: rgba(216,40,0,0.1); }
+
+        .ai-meter {
+            height: 10px; background: #000;
+            border: 2px solid var(--border);
+            overflow: hidden; margin-bottom: 10px;
+        }
+        .ai-meter-fill { height: 100%; transition: width 0.6s steps(20); }
+        .ai-meter-fill.low { background: var(--safe-green); }
+        .ai-meter-fill.low-medium { background: #40d040; }
+        .ai-meter-fill.medium { background: var(--mid-yellow); }
+        .ai-meter-fill.medium-high { background: var(--question); }
+        .ai-meter-fill.high {
+            background: var(--danger-red);
+            animation: dangerFlash 1s steps(1) infinite;
+        }
+        @keyframes dangerFlash { 0% { opacity: 1; } 50% { opacity: 0.6; } }
+
+        .ai-analysis {
+            font-size: 8px; color: var(--text-dim); line-height: 2.2;
+            padding: 10px; background: rgba(0,0,0,0.3);
+            border-left: 4px solid var(--question);
+        }
+        .bls-link {
+            display: inline-block; margin-top: 10px;
+            font-size: 8px; color: var(--sky); text-decoration: none;
+        }
+        .bls-link:hover { color: var(--coin); }
+
+        /* SCATTER VIEW */
+        .scatter-container {
+            display: none; background: var(--surface-2);
+            border: 4px solid var(--border); padding: 20px; margin-bottom: 16px;
+        }
+        .scatter-container.active { display: block; }
+        .scatter-title {
+            font-size: 14px; margin-bottom: 6px; color: var(--coin);
+            text-shadow: 2px 2px 0 #000;
+        }
+        .scatter-subtitle { font-size: 8px; color: var(--text-dim); margin-bottom: 20px; line-height: 2; }
+        .scatter-chart {
+            position: relative; width: 100%; height: 450px;
+            border-left: 3px solid var(--border-light);
+            border-bottom: 3px solid var(--border-light);
+        }
+        .scatter-dot {
+            position: absolute; cursor: pointer; transition: all 0.15s;
+        }
+        .scatter-dot:hover {
+            transform: scale(1.6); z-index: 10;
+            box-shadow: 0 0 8px currentColor;
+        }
+        .scatter-tooltip {
+            display: none; position: absolute; background: #000;
+            border: 3px solid var(--coin); padding: 12px; font-size: 8px;
+            z-index: 20; pointer-events: none; min-width: 220px; line-height: 2.2;
+        }
+        .scatter-tooltip.active { display: block; }
+        .scatter-axis-label {
+            position: absolute; font-size: 7px; color: var(--text-dark); letter-spacing: 1px;
+        }
+        .scatter-axis-x { bottom: -28px; left: 50%; transform: translateX(-50%); }
+        .scatter-axis-y { top: 50%; left: -40px; transform: translateY(-50%) rotate(-90deg); white-space: nowrap; }
+        .scatter-tick { position: absolute; font-size: 7px; color: var(--text-dark); }
+        .scatter-legend { display: flex; gap: 16px; margin-top: 36px; flex-wrap: wrap; }
+        .scatter-legend-item { display: flex; align-items: center; gap: 8px; font-size: 8px; color: var(--text-dim); }
+        .scatter-legend-dot { width: 10px; height: 10px; }
+
+        /* TABLE VIEW */
+        .table-container { display: none; overflow-x: auto; }
+        .table-container.active { display: block; }
+        .data-table { width: 100%; border-collapse: collapse; border: 3px solid var(--border); }
+        .data-table th {
+            background: var(--surface-3); padding: 12px 10px; text-align: left;
+            font-size: 7px; color: var(--text-dim); border-bottom: 3px solid var(--border);
+            cursor: pointer; letter-spacing: 0.5px;
+        }
+        .data-table th:hover { color: var(--coin); }
+        .data-table td { padding: 10px; border-bottom: 2px solid var(--surface-3); font-size: 8px; }
+        .data-table tr:hover td { background: var(--surface-2); }
+        .data-table .salary-col { color: var(--coin-bright); }
+        .growth-positive { color: var(--safe-green); }
+        .growth-negative { color: var(--danger-red); }
+
+        /* COMPARE MODAL */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.85); z-index: 1000;
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--surface); border: 4px solid var(--coin);
+            max-width: 1100px; width: 100%; max-height: 85vh;
+            overflow-y: auto; padding: 24px;
+            box-shadow: 0 0 40px rgba(252,160,68,0.15);
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-bottom: 12px; border-bottom: 3px solid var(--border);
+        }
+        .modal-header h2 { font-size: 14px; color: var(--mario-red); text-shadow: 2px 2px 0 #000; }
+        .modal-close {
+            font-family: 'Press Start 2P', monospace;
+            background: var(--danger-red); border: 3px solid #ff4040;
+            color: var(--text); width: 32px; height: 32px;
+            cursor: pointer; font-size: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-close:hover { background: #ff0000; }
+
+        .compare-grid { display: grid; gap: 12px; }
+        .compare-row {
+            display: grid; grid-template-columns: 120px repeat(var(--cols), 1fr);
+            gap: 8px; align-items: center;
+        }
+        .compare-label { font-size: 7px; color: var(--text-dark); letter-spacing: 0.5px; }
+        .compare-cell {
+            background: #000; border: 2px solid var(--border);
+            padding: 12px 10px; text-align: center;
+        }
+        .compare-cell.header {
+            background: var(--surface-3); border-color: var(--border-light); font-size: 10px;
+        }
+        .compare-cell .big { font-size: 14px; }
+        .compare-cell .sub { font-size: 7px; color: var(--text-dark); margin-top: 4px; }
+
+        /* EMPTY STATE */
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-dark); }
+        .empty-state h3 { font-size: 12px; color: var(--text-dim); margin-bottom: 10px; }
+        .empty-state p { font-size: 8px; line-height: 2; }
+
+        /* FOOTER — GROUND LEVEL */
+        .game-footer {
+            position: relative; z-index: 1; text-align: center;
+            padding: 32px 20px 24px; background: var(--ground);
+            border-top: 4px solid var(--brick);
+            font-size: 7px; color: rgba(255,255,255,0.5); line-height: 2.4;
+        }
+        .game-footer::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 20px;
+            background: repeating-linear-gradient(90deg,
+                var(--ground) 0px, var(--ground) 30px,
+                var(--brick) 30px, var(--brick) 32px
+            );
+        }
+        .game-footer a { color: var(--coin-bright); text-decoration: none; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--border); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+        @media (max-width: 768px) {
+            .major-grid { grid-template-columns: 1fr; }
+            .controls { padding: 14px; }
+            .content { padding: 14px; }
+            .career-metrics { grid-template-columns: 1fr; }
+            .compare-row { grid-template-columns: 80px repeat(var(--cols), 1fr); }
+            .scatter-chart { height: 300px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="starfield" id="starfield"></div>
+
+<div class="hero">
+    <div class="cloud">☁</div>
+    <div class="cloud">☁</div>
+    <div class="cloud">☁</div>
+    <div>
+        <span class="title-coin">🪙</span>
+        <span class="title-coin" style="animation-delay:0.15s">🪙</span>
+        <span class="title-coin" style="animation-delay:0.3s">🪙</span>
+    </div>
+    <h1>
+        <span class="word-bryant">BRYANT</span>
+        <span class="word-quest">QUEST</span><br>
+        MAJOR ADVISOR
+    </h1>
+    <p class="hero-sub">
+        EXPLORE 31 MAJORS · REAL BLS SALARY DATA ·<br>
+        JOB GROWTH PROJECTIONS · AI IMPACT SCORES
+    </p>
+    <p class="press-start blink">▼ SELECT YOUR MAJOR ▼</p>
+    <div class="hero-source">
+        DATA: <a href="https://www.bls.gov/ooh/" target="_blank">BLS.GOV</a> ·
+        PROGRAMS: <a href="https://www.bryant.edu/undergraduate/academics/undergraduate-programs" target="_blank">BRYANT.EDU</a>
+    </div>
+</div>
+
+<div class="hud" id="hud">
+    <div class="hud-item"><div class="hud-label">MAJORS</div><div class="hud-value" id="statMajors">--</div></div>
+    <div class="hud-item"><div class="hud-label">CAREERS</div><div class="hud-value" id="statCareers">--</div></div>
+    <div class="hud-item"><div class="hud-label">AVG SALARY</div><div class="hud-value" id="statSalary">--</div></div>
+    <div class="hud-item"><div class="hud-label">AVG GROWTH</div><div class="hud-value" id="statGrowth">--</div></div>
+    <div class="hud-item"><div class="hud-label">AI EXPOSURE</div><div class="hud-value" id="statAI">--</div></div>
+</div>
+
+<div class="controls">
+    <div class="control-group">
+        <label>WORLD</label>
+        <select id="filterCollege">
+            <option value="">ALL COLLEGES</option>
+            <option value="College of Business">BUSINESS</option>
+            <option value="College of Arts & Sciences">ARTS & SCI</option>
+            <option value="School of Health & Behavioral Sciences">HEALTH & BS</option>
+        </select>
+    </div>
+    <div class="control-group">
+        <label>SORT</label>
+        <select id="sortBy">
+            <option value="name">NAME A-Z</option>
+            <option value="salary_high">$$$ HIGH</option>
+            <option value="salary_low">$$$ LOW</option>
+            <option value="growth">FAST GROWTH</option>
+            <option value="ai_safe">AI-SAFE</option>
+            <option value="ai_risk">AI-RISK</option>
+        </select>
+    </div>
+    <div class="control-group">
+        <label>DANGER</label>
+        <select id="filterAI">
+            <option value="">ALL LEVELS</option>
+            <option value="low">★ SAFE</option>
+            <option value="low-medium">★★ LOW-MED</option>
+            <option value="medium">★★★ MEDIUM</option>
+            <option value="medium-high">★★★★ MED-HIGH</option>
+            <option value="high">☠ DANGER</option>
+        </select>
+    </div>
+    <div class="control-group search-box">
+        <label>SEARCH</label>
+        <input type="text" id="searchInput" placeholder="FIND MAJOR...">
+    </div>
+    <div class="control-group">
+        <label>VIEW</label>
+        <div class="view-toggle">
+            <button class="active" data-view="cards">CARDS</button>
+            <button data-view="table">TABLE</button>
+            <button data-view="scatter">MAP</button>
+        </div>
+    </div>
+    <div class="compare-toggle">
+        <span class="compare-count" id="compareCount">0 SELECTED</span>
+        <button class="compare-btn" id="compareBtn" onclick="openCompare()">⚔ BATTLE!</button>
+    </div>
+</div>
+
+<div class="content">
+    <div class="scatter-container" id="scatterView">
+        <div class="scatter-title">⚔ SALARY vs AI DANGER MAP</div>
+        <div class="scatter-subtitle">EACH BLOCK = A CAREER. BIGGER = FASTER GROWTH. HOVER FOR INTEL.</div>
+        <div class="scatter-chart" id="scatterChart">
+            <div class="scatter-axis-label scatter-axis-x">AI EXPOSURE →</div>
+            <div class="scatter-axis-label scatter-axis-y">MEDIAN SALARY →</div>
+            <div class="scatter-tooltip" id="scatterTooltip"></div>
+        </div>
+        <div class="scatter-legend">
+            <div class="scatter-legend-item"><div class="scatter-legend-dot" style="background:var(--sky)"></div> BUSINESS</div>
+            <div class="scatter-legend-item"><div class="scatter-legend-dot" style="background:#c080ff"></div> ARTS & SCI</div>
+            <div class="scatter-legend-item"><div class="scatter-legend-dot" style="background:var(--safe-green)"></div> HEALTH & BS</div>
+            <div class="scatter-legend-item" style="font-size:7px;color:var(--text-dark)">BLOCK SIZE = GROWTH RATE</div>
+        </div>
+    </div>
+    <div class="table-container" id="tableView"></div>
+    <div class="major-grid" id="majorGrid"></div>
+</div>
+
+<div class="modal-overlay" id="compareModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>⚔ BOSS BATTLE: COMPARE MAJORS</h2>
+            <button class="modal-close" onclick="closeCompare()">X</button>
+        </div>
+        <div id="compareContent"></div>
+    </div>
+</div>
+
+<div class="game-footer">
+    © 2026 BRYANT QUEST · SALARY DATA FROM
+    <a href="https://www.bls.gov/ooh/" target="_blank">U.S. BUREAU OF LABOR STATISTICS</a> (2024 EST.)<br>
+    GROWTH: 2023-2033 · AI IMPACT SCORES ARE QUALITATIVE ESTIMATES<br>
+    PROGRAMS: <a href="https://www.bryant.edu/undergraduate/academics/undergraduate-programs" target="_blank">BRYANT UNIVERSITY UNDERGRADUATE</a>
+</div>
+
+<script>
+// Generate starfield
+(function() {
+    const sf = document.getElementById('starfield');
+    for (let i = 0; i < 120; i++) {
+        const s = document.createElement('div');
+        s.className = 'star';
+        s.style.left = Math.random() * 100 + '%';
+        s.style.top = Math.random() * 100 + '%';
+        s.style.animationDelay = (Math.random() * 3) + 's';
+        s.style.animationDuration = (1 + Math.random() * 3) + 's';
+        if (Math.random() > 0.7) { s.style.width = '3px'; s.style.height = '3px'; }
+        sf.appendChild(s);
+    }
+})();
+
+let allMajors = [];
+let selectedIds = new Set();
+let currentView = 'cards';
+
+async function init() {
+    const [majorsRes, statsRes] = await Promise.all([
+        fetch('/api/majors?sort=name'),
+        fetch('/api/stats')
+    ]);
+    allMajors = await majorsRes.json();
+    const stats = await statsRes.json();
+
+    animateNumber('statMajors', stats.total_majors);
+    animateNumber('statCareers', stats.total_careers);
+    document.getElementById('statSalary').textContent = '$' + stats.avg_salary.toLocaleString();
+    document.getElementById('statGrowth').textContent = stats.avg_growth + '%';
+    document.getElementById('statAI').textContent = stats.avg_ai_score + '/100';
+
+    renderCards(allMajors);
+    renderScatter(stats.all_careers);
+    renderTable(allMajors);
+}
+
+function animateNumber(id, target) {
+    const el = document.getElementById(id);
+    let current = 0;
+    const step = Math.max(1, Math.floor(target / 20));
+    const interval = setInterval(() => {
+        current += step;
+        if (current >= target) { current = target; clearInterval(interval); }
+        el.textContent = current;
+    }, 40);
+}
+
+function formatSalary(n) { return '$' + n.toLocaleString(); }
+
+function getCollegeClass(college) {
+    if (college.includes('Business')) return 'business';
+    if (college.includes('Arts')) return 'arts';
+    return 'health';
+}
+function getCollegeShort(college) {
+    if (college.includes('Business')) return 'BUSINESS';
+    if (college.includes('Arts')) return 'ARTS&SCI';
+    return 'HEALTH';
+}
+function getAIClass(impact) { return impact.toLowerCase().replace(' ', '-'); }
+function getAIColor(score) {
+    if (score <= 25) return 'var(--safe-green)';
+    if (score <= 40) return '#40d040';
+    if (score <= 55) return 'var(--mid-yellow)';
+    if (score <= 70) return 'var(--question)';
+    return 'var(--danger-red)';
+}
+
+function renderCards(majors) {
+    const grid = document.getElementById('majorGrid');
+    if (majors.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><h3>GAME OVER</h3><p>NO MAJORS FOUND.<br>TRY DIFFERENT FILTERS.</p></div>';
+        return;
+    }
+    grid.innerHTML = majors.map(m => `
+        <div class="major-card ${selectedIds.has(m.id) ? 'selected' : ''}" data-id="${m.id}">
+            <div class="card-select ${selectedIds.has(m.id) ? 'checked' : ''}" onclick="toggleSelect(${m.id}, event)">${selectedIds.has(m.id) ? '⭐' : '☆'}</div>
+            <div class="card-header">
+                <h2>${m.major.toUpperCase()}</h2>
+                <span class="college-tag ${getCollegeClass(m.college)}">${getCollegeShort(m.college)}</span>
+            </div>
+            <div class="card-desc">${m.description}</div>
+            ${m.careers.map((c, i) => `
+                <div class="career-block" id="career-${m.id}-${i}">
+                    <div class="career-header" onclick="toggleCareer('career-${m.id}-${i}')">
+                        <span class="career-title">${c.title.toUpperCase()}</span>
+                        <span class="career-salary">${formatSalary(c.median_salary)}</span>
+                        <span class="career-expand-icon">▼</span>
+                    </div>
+                    <div class="career-details">
+                        <div class="career-details-inner">
+                            <div class="career-metrics">
+                                <div class="metric">
+                                    <div class="metric-value" style="color:${c.growth_rate >= 0 ? 'var(--safe-green)' : 'var(--danger-red)'}">${c.growth_rate >= 0 ? '+' : ''}${c.growth_rate}%</div>
+                                    <div class="metric-label">10YR GROWTH</div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-value" style="color:var(--text)">${c.total_employment.toLocaleString()}</div>
+                                    <div class="metric-label">TOTAL JOBS</div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-value" style="color:var(--text)">${c.annual_openings.toLocaleString()}</div>
+                                    <div class="metric-label">OPENINGS/YR</div>
+                                </div>
+                            </div>
+                            <div class="salary-range">
+                                <div class="salary-range-header">
+                                    <span>LVL 1: ${formatSalary(c.entry_salary)}</span>
+                                    <span>MAX LVL: ${formatSalary(c.top_salary)}</span>
+                                </div>
+                                <div class="salary-bar-bg">
+                                    <div class="salary-bar-fill" style="width:${(c.top_salary / 350000) * 100}%"></div>
+                                    <div class="salary-bar-median" style="left:${(c.median_salary / 350000) * 100}%"></div>
+                                </div>
+                            </div>
+                            <div class="ai-impact-section">
+                                <div class="ai-impact-header">
+                                    <span class="ai-impact-label">🤖 AI DANGER LEVEL</span>
+                                    <span class="ai-badge ${getAIClass(c.ai_impact)}">${c.ai_impact.toUpperCase()} ${c.ai_impact_score}/100</span>
+                                </div>
+                                <div class="ai-meter">
+                                    <div class="ai-meter-fill ${getAIClass(c.ai_impact)}" style="width:${c.ai_impact_score}%"></div>
+                                </div>
+                                <div class="ai-analysis">${c.ai_analysis}</div>
+                            </div>
+                            <a class="bls-link" href="${c.bls_url}" target="_blank">📊 VIEW FULL BLS DATA →</a>
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `).join('');
+}
+
+function toggleCareer(id) { document.getElementById(id).classList.toggle('expanded'); }
+
+function toggleSelect(id, e) {
+    e.stopPropagation();
+    if (selectedIds.has(id)) { selectedIds.delete(id); }
+    else {
+        if (selectedIds.size >= 4) { alert('MAX 4 PLAYERS!'); return; }
+        selectedIds.add(id);
+    }
+    updateCompareUI();
+    const card = document.querySelector(`.major-card[data-id="${id}"]`);
+    const cb = card.querySelector('.card-select');
+    card.classList.toggle('selected');
+    if (selectedIds.has(id)) { cb.classList.add('checked'); cb.textContent = '⭐'; }
+    else { cb.classList.remove('checked'); cb.textContent = '☆'; }
+}
+
+function updateCompareUI() {
+    const n = selectedIds.size;
+    document.getElementById('compareBtn').classList.toggle('visible', n >= 2);
+    const cnt = document.getElementById('compareCount');
+    cnt.classList.toggle('visible', n > 0);
+    cnt.textContent = n + ' SELECTED';
+}
+
+async function openCompare() {
+    const ids = [...selectedIds];
+    const res = await fetch('/api/compare?ids=' + ids.join('&ids='));
+    const data = await res.json();
+    const cols = data.length;
+    const content = document.getElementById('compareContent');
+    let html = `<div class="compare-grid" style="--cols:${cols}">`;
+    html += `<div class="compare-row"><div class="compare-label">PLAYER</div>${data.map(m =>
+        `<div class="compare-cell header">${m.major.toUpperCase()}</div>`).join('')}</div>`;
+    html += `<div class="compare-row"><div class="compare-label">WORLD</div>${data.map(m =>
+        `<div class="compare-cell"><span class="college-tag ${getCollegeClass(m.college)}">${getCollegeShort(m.college)}</span></div>`).join('')}</div>`;
+    html += `<div class="compare-row"><div class="compare-label">GOLD</div>${data.map(m => {
+        const best = m.careers.reduce((a, b) => a.median_salary > b.median_salary ? a : b);
+        return `<div class="compare-cell"><div class="big" style="color:var(--coin-bright)">${formatSalary(best.median_salary)}</div><div class="sub">${best.title.toUpperCase()}</div></div>`;
+    }).join('')}</div>`;
+    html += `<div class="compare-row"><div class="compare-label">POWER-UP</div>${data.map(m => {
+        const best = m.careers.reduce((a, b) => a.growth_rate > b.growth_rate ? a : b);
+        return `<div class="compare-cell"><div class="big" style="color:${best.growth_rate >= 0 ? 'var(--safe-green)' : 'var(--danger-red)'}">${best.growth_rate >= 0 ? '+' : ''}${best.growth_rate}%</div><div class="sub">${best.growth_label.toUpperCase()}</div></div>`;
+    }).join('')}</div>`;
+    html += `<div class="compare-row"><div class="compare-label">DEFENSE</div>${data.map(m => {
+        const safest = m.careers.reduce((a, b) => a.ai_impact_score < b.ai_impact_score ? a : b);
+        return `<div class="compare-cell"><div class="big" style="color:${getAIColor(safest.ai_impact_score)}">${safest.ai_impact_score}/100</div><div class="sub">${safest.ai_impact.toUpperCase()}</div></div>`;
+    }).join('')}</div>`;
+    html += `<div class="compare-row"><div class="compare-label">SPAWNS/YR</div>${data.map(m => {
+        const total = m.careers.reduce((s, c) => s + c.annual_openings, 0);
+        return `<div class="compare-cell"><div class="big" style="color:var(--text)">${total.toLocaleString()}</div><div class="sub">JOB OPENINGS</div></div>`;
+    }).join('')}</div>`;
+    html += '</div>';
+    content.innerHTML = html;
+    document.getElementById('compareModal').classList.add('active');
+}
+function closeCompare() { document.getElementById('compareModal').classList.remove('active'); }
+
+function renderScatter(careers) {
+    const chart = document.getElementById('scatterChart');
+    const maxSalary = 250000;
+    const padding = 40;
+    const w = chart.clientWidth - padding;
+    const h = chart.clientHeight - padding;
+    for (let i = 0; i <= 4; i++) {
+        const y = padding + (h / 4) * i;
+        const salary = maxSalary - (maxSalary / 4) * i;
+        const line = document.createElement('div');
+        line.style.cssText = `position:absolute;left:0;right:0;top:${y}px;height:1px;background:var(--border);opacity:0.3;`;
+        chart.appendChild(line);
+        const tick = document.createElement('div');
+        tick.className = 'scatter-tick';
+        tick.style.cssText = `left:-46px;top:${y - 5}px;`;
+        tick.textContent = '$' + (salary / 1000) + 'K';
+        chart.appendChild(tick);
+    }
+    for (let i = 0; i <= 4; i++) {
+        const x = padding + (w / 4) * i;
+        const score = (100 / 4) * i;
+        const line = document.createElement('div');
+        line.style.cssText = `position:absolute;top:0;bottom:0;left:${x}px;width:1px;background:var(--border);opacity:0.3;`;
+        chart.appendChild(line);
+        const tick = document.createElement('div');
+        tick.className = 'scatter-tick';
+        tick.style.cssText = `left:${x - 6}px;bottom:-20px;`;
+        tick.textContent = Math.round(score);
+        chart.appendChild(tick);
+    }
+    careers.forEach(c => {
+        const x = padding + (c.ai_impact_score / 100) * w;
+        const y = padding + ((maxSalary - c.median_salary) / maxSalary) * h;
+        const size = Math.max(10, Math.min(30, 8 + c.growth_rate * 0.7));
+        let color = 'var(--sky)';
+        if (c.major.includes('History') || c.major.includes('Literary') || c.major.includes('Spanish') || c.major.includes('Arts') || c.major.includes('Politics') || c.major.includes('Sociology') || c.major.includes('Sports') || c.major.includes('Communication') || c.major.includes('Actuarial') || c.major.includes('Applied Math') || c.major.includes('Business Econ'))
+            color = '#c080ff';
+        if (c.major.includes('Biology') || c.major.includes('Health') || c.major.includes('Exercise') || c.major.includes('Psychology'))
+            color = 'var(--safe-green)';
+        const dot = document.createElement('div');
+        dot.className = 'scatter-dot';
+        dot.style.cssText = `left:${x - size/2}px;top:${y - size/2}px;width:${size}px;height:${size}px;background:${color};`;
+        dot.addEventListener('mouseenter', () => {
+            const tooltip = document.getElementById('scatterTooltip');
+            tooltip.innerHTML = `<strong style="color:var(--coin)">${c.career.toUpperCase()}</strong><br><span style="color:var(--text-dim)">${c.major.toUpperCase()}</span><br>GOLD: <strong style="color:var(--coin-bright)">${formatSalary(c.median_salary)}</strong><br>GROWTH: <strong style="color:var(--safe-green)">${c.growth_rate}%</strong> · AI: <strong style="color:${getAIColor(c.ai_impact_score)}">${c.ai_impact_score}/100</strong>`;
+            tooltip.classList.add('active');
+            tooltip.style.left = (x + size + 8) + 'px';
+            tooltip.style.top = Math.max(0, y - 30) + 'px';
+        });
+        dot.addEventListener('mouseleave', () => {
+            document.getElementById('scatterTooltip').classList.remove('active');
+        });
+        chart.appendChild(dot);
+    });
+}
+
+function renderTable(majors) {
+    const container = document.getElementById('tableView');
+    let rows = [];
+    majors.forEach(m => { m.careers.forEach(c => { rows.push({ major: m.major, college: m.college, ...c }); }); });
+    container.innerHTML = `
+        <table class="data-table">
+            <thead><tr>
+                <th>MAJOR</th><th>CAREER</th><th>SALARY</th><th>ENTRY</th><th>MAX</th><th>GROWTH</th><th>OPENINGS</th><th>AI</th>
+            </tr></thead>
+            <tbody>
+                ${rows.map(r => `<tr>
+                    <td><strong>${r.major.toUpperCase()}</strong></td>
+                    <td>${r.title.toUpperCase()}</td>
+                    <td class="salary-col">${formatSalary(r.median_salary)}</td>
+                    <td style="color:var(--text-dim)">${formatSalary(r.entry_salary)}</td>
+                    <td style="color:var(--text-dim)">${formatSalary(r.top_salary)}</td>
+                    <td class="${r.growth_rate >= 0 ? 'growth-positive' : 'growth-negative'}">${r.growth_rate >= 0 ? '+' : ''}${r.growth_rate}%</td>
+                    <td>${r.annual_openings.toLocaleString()}</td>
+                    <td><span class="ai-badge ${getAIClass(r.ai_impact)}">${r.ai_impact_score}</span></td>
+                </tr>`).join('')}
+            </tbody>
+        </table>`;
+}
+
+// View switching
+document.querySelectorAll('.view-toggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentView = btn.dataset.view;
+        document.getElementById('majorGrid').style.display = currentView === 'cards' ? 'grid' : 'none';
+        document.getElementById('tableView').classList.toggle('active', currentView === 'table');
+        document.getElementById('scatterView').classList.toggle('active', currentView === 'scatter');
+    });
+});
+
+// Filters
+async function applyFilters() {
+    const college = document.getElementById('filterCollege').value;
+    const sort = document.getElementById('sortBy').value;
+    const ai = document.getElementById('filterAI').value;
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const params = new URLSearchParams();
+    if (college) params.set('college', college);
+    if (sort) params.set('sort', sort);
+    if (ai) params.set('ai_impact', ai);
+    const res = await fetch('/api/majors?' + params.toString());
+    let data = await res.json();
+    if (search) {
+        data = data.filter(m =>
+            m.major.toLowerCase().includes(search) ||
+            m.description.toLowerCase().includes(search) ||
+            m.careers.some(c => c.title.toLowerCase().includes(search))
+        );
+    }
+    renderCards(data);
+    renderTable(data);
+}
+
+document.getElementById('filterCollege').addEventListener('change', applyFilters);
+document.getElementById('sortBy').addEventListener('change', applyFilters);
+document.getElementById('filterAI').addEventListener('change', applyFilters);
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+document.getElementById('compareModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('compareModal')) closeCompare();
+});
+
+init();
+</script>
+</body>
+</html>
