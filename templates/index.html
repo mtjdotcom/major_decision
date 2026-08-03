@@ -231,6 +231,12 @@
             border-radius: 8px; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 14px;
         }
         body.professor .compare-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(240,160,64,0.15); }
+        body.professor .clear-btn {
+            background: transparent; color: #8890a4; border: 1px solid #2a3040;
+            padding: 10px 16px; border-radius: 8px;
+            font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 13px;
+        }
+        body.professor .clear-btn:hover { color: #f87171; border-color: #f87171; background: rgba(248,113,113,0.08); }
 
         /* — Content — */
         body.professor .content {
@@ -513,6 +519,13 @@
             box-shadow: inset -2px -2px 0 rgba(0,0,0,0.4), inset 2px 2px 0 rgba(255,255,255,0.2);
         }
         body.gamer .compare-btn:hover { transform: scale(1.05); }
+        body.gamer .clear-btn {
+            font-family: 'Press Start 2P', monospace; font-size: 9px;
+            background: #383838; color: #fcfcfc; border: 3px solid #686868;
+            border-radius: 0; padding: 10px 14px;
+            box-shadow: inset -2px -2px 0 rgba(0,0,0,0.4), inset 2px 2px 0 rgba(255,255,255,0.15);
+        }
+        body.gamer .clear-btn:hover { background: #e40058; border-color: #ff4080; transform: scale(1.05); }
 
         /* — Content — */
         body.gamer .content {
@@ -709,6 +722,9 @@
         .compare-count.visible { display: block; }
         .compare-btn { display: none; cursor: pointer; }
         .compare-btn.visible { display: block; }
+        .clear-btn { display: none; cursor: pointer; }
+        .clear-btn.visible { display: block; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
         .major-grid { display: grid; gap: 16px; }
         .major-card { position: relative; }
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
@@ -727,6 +743,10 @@
         .salary-bar-fill { height: 100%; }
         .salary-bar-median { position: absolute; transform: translateX(-50%); }
         .ai-impact-section { margin-top: 12px; }
+        .method-link { text-decoration: none; opacity: 0.65; }
+        .method-link:hover { opacity: 1; text-decoration: underline; }
+        body.professor .method-link { color: #60a5fa; }
+        body.gamer .method-link { color: #5c94fc; }
         .ai-impact-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .scatter-container { display: none; margin-bottom: 20px; }
         .scatter-container.active { display: block; }
@@ -877,6 +897,7 @@
     </div>
     <div class="compare-toggle">
         <span class="compare-count" id="compareCount">0 selected</span>
+        <button class="clear-btn" id="clearBtn" onclick="clearSelection()">Clear</button>
         <button class="compare-btn" id="compareBtn" onclick="openCompare()">Compare</button>
     </div>
 </div>
@@ -908,6 +929,9 @@
             <button class="modal-close" onclick="closeCompare()">✕</button>
         </div>
         <div id="compareContent"></div>
+        <div class="modal-footer">
+            <button class="clear-btn visible" id="modalClearBtn" onclick="clearSelection(true)">Clear Selection</button>
+        </div>
     </div>
 </div>
 
@@ -918,8 +942,8 @@
     <a href="https://www.bls.gov/ooh/" target="_blank"><span class="professor-only">U.S. Bureau of Labor Statistics</span><span class="gamer-only">U.S. BUREAU OF LABOR STATISTICS</span></a>
     <span class="professor-only">(2024 estimates).</span>
     <span class="gamer-only">(2024 EST.)</span><br>
-    <span class="professor-only">Job growth projections are for 2023–2033. AI impact assessments are qualitative estimates and should be considered alongside personal interests, aptitudes, and goals.</span>
-    <span class="gamer-only">GROWTH: 2023-2033 · AI IMPACT SCORES ARE QUALITATIVE ESTIMATES</span><br>
+    <span class="professor-only">Job growth projections are for 2023–2033. AI impact assessments are qualitative estimates — <a href="/methodology">read the methodology</a> to understand how they were derived and what they can't tell you.</span>
+    <span class="gamer-only">GROWTH: 2023-2033 · <a href="/methodology">HOW AI SCORES WORK ►</a></span><br>
     <span class="professor-only">Programs listed from</span>
     <span class="gamer-only">PROGRAMS:</span>
     <a href="https://www.bryant.edu/undergraduate/academics/undergraduate-programs" target="_blank"><span class="professor-only">Bryant University Undergraduate Programs</span><span class="gamer-only">BRYANT UNIVERSITY UNDERGRADUATE</span></a><span class="professor-only">.</span>
@@ -968,8 +992,15 @@ function updateThemeLabels() {
     // Compare button text
     document.getElementById('compareBtn').textContent = isGamer ? '⚔ BATTLE!' : 'Compare';
 
+    // Clear button text
+    document.getElementById('clearBtn').textContent = isGamer ? '✕ RESET' : 'Clear';
+    document.getElementById('modalClearBtn').textContent = isGamer ? '✕ RESET PLAYERS' : 'Clear Selection';
+
     // Search placeholder
     document.getElementById('searchInput').placeholder = isGamer ? 'FIND MAJOR...' : 'Search majors or careers…';
+
+    // Re-render the compare bar so its count text matches the theme's casing
+    updateCompareUI();
 }
 
 /* ═══════ Generate starfield ═══════ */
@@ -1099,7 +1130,7 @@ function renderCards(majors) {
                         </div>
                         <div class="ai-impact-section">
                             <div class="ai-impact-header">
-                                <span class="ai-impact-label">${t('AI Disruption Risk','🤖 AI DANGER LEVEL')}</span>
+                                <span class="ai-impact-label">${t('AI Disruption Risk','🤖 AI DANGER LEVEL')} <a href="/methodology" class="method-link" title="How is this scored?">${t('(how?)','(?)')}</a></span>
                                 <span class="ai-badge ${getAIClass(c.ai_impact)}">${G ? c.ai_impact.toUpperCase() : c.ai_impact} (${c.ai_impact_score}/100)</span>
                             </div>
                             <div class="ai-meter">
@@ -1128,9 +1159,17 @@ function toggleSelect(id, e) {
 function updateCompareUI() {
     const n = selectedIds.size;
     document.getElementById('compareBtn').classList.toggle('visible', n >= 2);
+    document.getElementById('clearBtn').classList.toggle('visible', n > 0);
     const cnt = document.getElementById('compareCount');
     cnt.classList.toggle('visible', n > 0);
     cnt.textContent = n + (currentTheme === 'gamer' ? ' SELECTED' : ' selected');
+}
+
+function clearSelection(closeModal) {
+    selectedIds.clear();
+    updateCompareUI();
+    renderCards(lastRenderedMajors);
+    if (closeModal) closeCompare();
 }
 
 async function openCompare() {

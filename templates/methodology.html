@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Methodology — AI Impact Scores | Bryant Major Advisor</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { min-height: 100vh; overflow-x: hidden; transition: background .4s, color .4s; }
+
+        /* ═══ THEME TOGGLE ═══ */
+        .theme-toggle {
+            position: fixed; top: 16px; right: 16px; z-index: 10000;
+            display: flex; border-radius: 100px; overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0,0,0,.5); cursor: pointer; user-select: none;
+        }
+        .theme-toggle button {
+            border: none; padding: 10px 18px; font-weight: 700; font-size: 12px;
+            cursor: pointer; transition: all .25s; letter-spacing: .5px; outline: none;
+        }
+        body.professor .theme-toggle button { font-family: 'DM Sans', sans-serif; }
+        body.professor .theme-toggle .tog-professor { background: #f0a040; color: #0a0c10; }
+        body.professor .theme-toggle .tog-gamer { background: #1a1e28; color: #5a6278; }
+        body.gamer .theme-toggle { border-radius: 0; border: 3px solid #fca044; }
+        body.gamer .theme-toggle button {
+            font-family: 'Press Start 2P', monospace; font-size: 8px; padding: 12px 14px; border-radius: 0;
+        }
+        body.gamer .theme-toggle .tog-gamer { background: #e40058; color: #fcfcfc; }
+        body.gamer .theme-toggle .tog-professor { background: #181830; color: #686868; }
+
+        body.professor .gamer-only { display: none !important; }
+        body.gamer .professor-only { display: none !important; }
+
+        .scanlines {
+            position: fixed; inset: 0; pointer-events: none; z-index: 9999; display: none;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,.12) 0, rgba(0,0,0,.12) 1px, transparent 1px, transparent 3px);
+        }
+        body.gamer .scanlines { display: block; }
+
+        /* ═══ SHARED LAYOUT ═══ */
+        .wrap { max-width: 900px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+        .page-hero { padding: 72px 0 40px; text-align: center; position: relative; z-index: 1; }
+        .back-link { display: inline-block; margin-bottom: 20px; text-decoration: none; }
+        section { padding: 36px 0; }
+        section + section { border-top: 1px solid; }
+        h2 { margin-bottom: 8px; }
+        .section-intro { margin-bottom: 24px; }
+        p { margin-bottom: 14px; }
+        ul, ol { margin: 0 0 16px 20px; }
+        li { margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { text-align: left; padding: 12px 14px; }
+        .num { text-align: right; white-space: nowrap; }
+        .callout { padding: 18px 22px; margin: 22px 0; }
+        .dim-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin: 20px 0; }
+        .dim { padding: 18px 20px; }
+        .dim h3 { font-size: 1em; margin-bottom: 6px; }
+        .dim .weight { font-size: .8em; opacity: .6; display: block; margin-bottom: 8px; }
+        .dim p { font-size: .9em; margin: 0; }
+        .band-bar { height: 8px; margin: 6px 0 4px; }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .examples { font-size: .85em; opacity: .7; }
+        footer { padding: 40px 0; text-align: center; margin-top: 20px; }
+
+        /* ═══ PROFESSOR ═══ */
+        body.professor {
+            font-family: 'DM Sans', sans-serif; background: #0a0c10; color: #e8eaf0; line-height: 1.65;
+        }
+        body.professor .page-hero { border-bottom: 1px solid #2a3040; }
+        body.professor h1 {
+            font-family: 'Fraunces', serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 900;
+            letter-spacing: -.02em; line-height: 1.15;
+            background: linear-gradient(135deg, #e8eaf0, #f0a040);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        body.professor .page-hero p { color: #8890a4; max-width: 620px; margin: 12px auto 0; font-size: 17px; }
+        body.professor .back-link { color: #60a5fa; font-size: 14px; }
+        body.professor h2 { font-family: 'Fraunces', serif; font-size: 26px; color: #e8eaf0; }
+        body.professor .section-intro { color: #8890a4; }
+        body.professor section + section { border-color: #2a3040; }
+        body.professor p, body.professor li { color: #c3c8d4; }
+        body.professor strong { color: #e8eaf0; }
+        body.professor .callout {
+            background: #13161d; border-left: 3px solid #f0a040; border-radius: 8px;
+        }
+        body.professor .callout.warn { border-left-color: #fbbf24; }
+        body.professor .dim { background: #13161d; border: 1px solid #2a3040; border-radius: 10px; }
+        body.professor .dim h3 { color: #f0a040; }
+        body.professor th {
+            background: #1a1e28; color: #5a6278; font-size: 12px; text-transform: uppercase;
+            letter-spacing: 1px; border-bottom: 1px solid #2a3040;
+        }
+        body.professor td { border-bottom: 1px solid #2a3040; font-size: 14px; }
+        body.professor tr:hover td { background: #13161d; }
+        body.professor code {
+            background: #1a1e28; padding: 2px 6px; border-radius: 4px; font-size: .9em; color: #f0a040;
+        }
+        body.professor footer { border-top: 1px solid #2a3040; color: #5a6278; font-size: 13px; }
+        body.professor a { color: #60a5fa; }
+
+        /* ═══ GAMER ═══ */
+        body.gamer {
+            font-family: 'Press Start 2P', monospace; background: #000; color: #fcfcfc;
+            line-height: 2.1; image-rendering: pixelated;
+        }
+        body.gamer .page-hero {
+            background: linear-gradient(180deg, #000020, #0000a0 55%, #5c94fc);
+            border-bottom: 8px solid #c84c0c; padding: 60px 20px 44px;
+        }
+        body.gamer h1 {
+            font-size: clamp(14px, 3.4vw, 26px); line-height: 1.7; color: #fcfcfc;
+            text-shadow: 4px 4px 0 #000; letter-spacing: 2px;
+        }
+        body.gamer .page-hero p {
+            font-size: 9px; color: #d8d8d8; max-width: 620px; margin: 16px auto 0;
+            line-height: 2.2; text-shadow: 2px 2px 0 #000;
+        }
+        body.gamer .back-link { color: #fcfc54; font-size: 8px; text-shadow: 2px 2px 0 #000; }
+        body.gamer h2 { font-size: 13px; color: #fca044; text-shadow: 2px 2px 0 #000; line-height: 1.7; }
+        body.gamer .section-intro { font-size: 8px; color: #b8b8b8; }
+        body.gamer section + section { border-color: #4040a0; border-top-width: 4px; }
+        body.gamer p, body.gamer li { font-size: 8px; color: #b8b8b8; }
+        body.gamer strong { color: #fcfcfc; }
+        body.gamer .callout {
+            background: #181830; border-left: 6px solid #f89800; padding: 16px 18px;
+        }
+        body.gamer .callout.warn { border-left-color: #d82800; }
+        body.gamer .dim { background: #202048; border: 3px solid #4040a0; }
+        body.gamer .dim h3 { font-size: 9px; color: #00a800; line-height: 1.8; }
+        body.gamer .dim .weight { font-size: 7px; color: #686868; }
+        body.gamer .dim p { font-size: 7px; line-height: 2.2; }
+        body.gamer th {
+            background: #282860; color: #b8b8b8; font-size: 7px; border-bottom: 3px solid #4040a0;
+        }
+        body.gamer td { border-bottom: 2px solid #282860; font-size: 7px; }
+        body.gamer tr:hover td { background: #202048; }
+        body.gamer table { border: 3px solid #4040a0; }
+        body.gamer code { background: #000; color: #fcfc54; padding: 2px 5px; font-size: .95em; }
+        body.gamer footer {
+            background: #c84c0c; border-top: 4px solid #a0440c;
+            font-size: 7px; color: rgba(255,255,255,.55); line-height: 2.4;
+        }
+        body.gamer a { color: #5c94fc; }
+        body.gamer .examples { font-size: 7px; }
+
+        @media (max-width: 700px) {
+            .two-col { grid-template-columns: 1fr; }
+            .wrap { padding: 0 16px; }
+        }
+    </style>
+</head>
+<body class="professor">
+
+<div class="scanlines"></div>
+
+<div class="theme-toggle">
+    <button class="tog-professor" onclick="setTheme('professor')">🎓 Professor</button>
+    <button class="tog-gamer" onclick="setTheme('gamer')">🎮 Gamer</button>
+</div>
+
+<div class="page-hero">
+    <div class="wrap">
+        <a class="back-link" href="/"><span class="professor-only">← Back to Major Advisor</span><span class="gamer-only">◄ BACK TO MAP</span></a>
+        <h1><span class="professor-only">How the AI Impact Score Works</span><span class="gamer-only">AI DANGER LEVEL:<br>HOW IT'S SCORED</span></h1>
+        <p class="professor-only">
+            Every career in this tool carries a 0–100 AI impact score. This page explains exactly
+            what that number means, how it was assigned, and — just as importantly — what it can't tell you.
+        </p>
+        <p class="gamer-only">
+            EVERY CAREER HAS A 0-100 AI DANGER SCORE.<br>
+            HERE'S WHAT IT MEANS AND WHERE IT COMES FROM.
+        </p>
+    </div>
+</div>
+
+<div class="wrap">
+
+    <!-- ═══ START HERE: WHAT THIS IS ═══ -->
+    <section>
+        <h2><span class="professor-only">Read this first</span><span class="gamer-only">READ THIS FIRST</span></h2>
+        <div class="callout warn">
+            <p><strong><span class="professor-only">These scores are informed judgment calls, not measurements.</span><span class="gamer-only">THESE SCORES ARE JUDGMENT CALLS, NOT MEASUREMENTS.</span></strong></p>
+            <p class="professor-only">
+                There is no official government or academic dataset that publishes an "AI impact score" per
+                occupation. The scores in this tool were assigned by applying a consistent rubric (described below)
+                to each occupation's task profile. Two thoughtful analysts using the same rubric could easily land
+                10–15 points apart on any given career.
+            </p>
+            <p class="gamer-only">
+                NO OFFICIAL DATASET PUBLISHES AN "AI IMPACT SCORE" PER JOB.
+                THESE WERE ASSIGNED BY APPLYING A RUBRIC TO EACH JOB'S TASKS.
+                TWO ANALYSTS COULD EASILY DIFFER BY 10-15 POINTS.
+            </p>
+            <p class="professor-only">
+                Treat the score as a conversation starter and a way to compare careers <em>relative to each other</em>
+                — not as a prediction about your future.
+            </p>
+            <p class="gamer-only">
+                USE IT TO COMPARE CAREERS AGAINST EACH OTHER.
+                NOT AS A PREDICTION ABOUT YOUR FUTURE.
+            </p>
+        </div>
+    </section>
+
+    <!-- ═══ WHAT THE SCORE MEASURES ═══ -->
+    <section>
+        <h2><span class="professor-only">What the score actually measures</span><span class="gamer-only">WHAT THE SCORE MEASURES</span></h2>
+        <p class="section-intro professor-only">
+            The score estimates <strong>task exposure</strong> — the share of an occupation's day-to-day work that
+            current and near-term AI systems could plausibly perform, assist with, or make dramatically faster.
+        </p>
+        <p class="section-intro gamer-only">
+            THE SCORE ESTIMATES <strong>TASK EXPOSURE</strong> — HOW MUCH OF THE JOB'S
+            DAILY WORK AI COULD DO, ASSIST WITH, OR SPEED UP.
+        </p>
+
+        <p class="professor-only">A critical distinction that trips people up:</p>
+        <p class="gamer-only">IMPORTANT DISTINCTION:</p>
+        <ul>
+            <li class="professor-only"><strong>Exposure is not elimination.</strong> A high score means AI touches a lot of the work. It does not mean the job disappears. Radiology is heavily AI-exposed and radiologist demand is still growing.</li>
+            <li class="gamer-only"><strong>EXPOSURE ≠ ELIMINATION.</strong> A HIGH SCORE MEANS AI TOUCHES A LOT OF THE WORK. NOT THAT THE JOB VANISHES.</li>
+            <li class="professor-only"><strong>Exposure often means transformation.</strong> The most common outcome is that the role's task mix shifts — routine work shrinks, judgment and client work expand.</li>
+            <li class="gamer-only"><strong>EXPOSURE USUALLY MEANS TRANSFORMATION.</strong> ROUTINE WORK SHRINKS, JUDGMENT WORK GROWS.</li>
+            <li class="professor-only"><strong>A low score isn't automatically good news.</strong> Some AI-resilient jobs are resilient because they're physical and low-paid, not because they're valuable and protected.</li>
+            <li class="gamer-only"><strong>LOW SCORE ISN'T AUTO-GOOD.</strong> SOME SAFE JOBS ARE SAFE BECAUSE THEY'RE PHYSICAL AND LOW-PAID.</li>
+        </ul>
+    </section>
+
+    <!-- ═══ THE RUBRIC ═══ -->
+    <section>
+        <h2><span class="professor-only">The five-dimension rubric</span><span class="gamer-only">THE 5-DIMENSION RUBRIC</span></h2>
+        <p class="section-intro professor-only">
+            Each occupation was assessed on five dimensions. Scores start at a baseline of 50 and move up or down
+            based on how the occupation profiles on each.
+        </p>
+        <p class="section-intro gamer-only">
+            EACH JOB IS RATED ON 5 DIMENSIONS. START AT 50, THEN ADJUST.
+        </p>
+
+        <div class="dim-grid">
+            <div class="dim">
+                <h3><span class="professor-only">1. Task routineness</span><span class="gamer-only">1. ROUTINENESS</span></h3>
+                <span class="weight"><span class="professor-only">Pushes score up</span><span class="gamer-only">PUSHES SCORE UP</span></span>
+                <p class="professor-only">How much of the work follows repeatable, rule-based patterns? Document review, data entry, standardized reporting, and template-driven writing score high here.</p>
+                <p class="gamer-only">HOW MUCH WORK FOLLOWS REPEATABLE RULES? DATA ENTRY, DOC REVIEW, TEMPLATE WRITING SCORE HIGH.</p>
+            </div>
+            <div class="dim">
+                <h3><span class="professor-only">2. Data-centricity</span><span class="gamer-only">2. DATA-CENTRIC</span></h3>
+                <span class="weight"><span class="professor-only">Pushes score up</span><span class="gamer-only">PUSHES SCORE UP</span></span>
+                <p class="professor-only">Does the job primarily process structured text, numbers, or images? Language models and vision models are strongest exactly where the raw material is digital.</p>
+                <p class="gamer-only">DOES THE JOB PROCESS TEXT, NUMBERS, OR IMAGES? AI IS STRONGEST WHERE INPUT IS DIGITAL.</p>
+            </div>
+            <div class="dim">
+                <h3><span class="professor-only">3. Physical & in-person demand</span><span class="gamer-only">3. PHYSICAL / IN-PERSON</span></h3>
+                <span class="weight"><span class="professor-only">Pushes score down</span><span class="gamer-only">PUSHES SCORE DOWN</span></span>
+                <p class="professor-only">Hands-on work, clinical contact, lab procedures, and physical presence are expensive and slow to automate. Robotics lags software by a wide margin.</p>
+                <p class="gamer-only">HANDS-ON WORK, CLINICAL CONTACT, LAB WORK. ROBOTICS LAGS SOFTWARE BADLY.</p>
+            </div>
+            <div class="dim">
+                <h3><span class="professor-only">4. Accountability & trust</span><span class="gamer-only">4. ACCOUNTABILITY</span></h3>
+                <span class="weight"><span class="professor-only">Pushes score down</span><span class="gamer-only">PUSHES SCORE DOWN</span></span>
+                <p class="professor-only">Does someone need to sign, certify, or be legally liable? Licensure, fiduciary duty, and regulatory sign-off create durable human requirements regardless of capability.</p>
+                <p class="gamer-only">DOES SOMEONE NEED TO SIGN OR BE LIABLE? LICENSES AND REGULATION PROTECT ROLES.</p>
+            </div>
+            <div class="dim">
+                <h3><span class="professor-only">5. Complex human interaction</span><span class="gamer-only">5. HUMAN INTERACTION</span></h3>
+                <span class="weight"><span class="professor-only">Pushes score down</span><span class="gamer-only">PUSHES SCORE DOWN</span></span>
+                <p class="professor-only">Negotiation, persuasion, counseling, teaching, and managing conflict. High-stakes interpersonal work where people specifically want a human counterpart.</p>
+                <p class="gamer-only">NEGOTIATION, COUNSELING, TEACHING, CONFLICT. PEOPLE WANT A HUMAN HERE.</p>
+            </div>
+            <div class="dim">
+                <h3><span class="professor-only">6. AI as amplifier</span><span class="gamer-only">6. AI AS AMPLIFIER</span></h3>
+                <span class="weight"><span class="professor-only">Pushes score down</span><span class="gamer-only">PUSHES SCORE DOWN</span></span>
+                <p class="professor-only">Some roles get <em>more</em> valuable as AI spreads — the people who build, deploy, audit, and govern these systems. Demand rises with adoption rather than falling.</p>
+                <p class="gamer-only">SOME ROLES GET MORE VALUABLE AS AI SPREADS — THE PEOPLE WHO BUILD AND GOVERN IT.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ SCORE BANDS ═══ -->
+    <section>
+        <h2><span class="professor-only">Score bands &amp; what they mean</span><span class="gamer-only">SCORE BANDS</span></h2>
+        <p class="section-intro professor-only">
+            Here's how the {{ total_careers }} career paths across {{ total_majors }} majors actually distribute.
+        </p>
+        <p class="section-intro gamer-only">
+            HOW {{ total_careers }} CAREERS ACROSS {{ total_majors }} MAJORS DISTRIBUTE.
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th><span class="professor-only">Band</span><span class="gamer-only">BAND</span></th>
+                    <th><span class="professor-only">Range</span><span class="gamer-only">RANGE</span></th>
+                    <th class="num"><span class="professor-only">Careers</span><span class="gamer-only">JOBS</span></th>
+                    <th class="num">%</th>
+                    <th><span class="professor-only">Interpretation</span><span class="gamer-only">MEANING</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in distribution %}
+                <tr>
+                    <td><strong>{{ b.label }}</strong></td>
+                    <td><code>{{ b.range }}</code></td>
+                    <td class="num">{{ b.count }}</td>
+                    <td class="num">{{ b.pct }}%</td>
+                    <td>
+                        {% if b.label == 'Low' %}<span class="professor-only">Core work is physical, licensed, or human-facing. AI assists at the margins.</span><span class="gamer-only">PHYSICAL, LICENSED, OR HUMAN-FACING. AI HELPS ONLY AT EDGES.</span>
+                        {% elif b.label == 'Low-Medium' %}<span class="professor-only">Meaningful AI assistance, but judgment and relationships anchor the role.</span><span class="gamer-only">AI HELPS, BUT JUDGMENT ANCHORS THE ROLE.</span>
+                        {% elif b.label == 'Medium' %}<span class="professor-only">Task mix shifts noticeably. AI fluency becomes a hiring differentiator.</span><span class="gamer-only">TASK MIX SHIFTS. AI SKILLS BECOME A HIRING EDGE.</span>
+                        {% elif b.label == 'Medium-High' %}<span class="professor-only">Large routine component automatable. Career depends on moving up-stack.</span><span class="gamer-only">BIG ROUTINE CHUNK AUTOMATABLE. MUST MOVE UP-STACK.</span>
+                        {% else %}<span class="professor-only">Majority of standard tasks are AI-addressable. Expect role redefinition.</span><span class="gamer-only">MOST STANDARD TASKS ARE AI-ADDRESSABLE. EXPECT REDEFINITION.</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <!-- ═══ EXTREMES ═══ -->
+    <section>
+        <h2><span class="professor-only">The extremes in this dataset</span><span class="gamer-only">THE EXTREMES</span></h2>
+        <div class="two-col">
+            <div>
+                <h3 style="margin-bottom:12px"><span class="professor-only">Most AI-resilient</span><span class="gamer-only">★ MOST RESILIENT</span></h3>
+                <table>
+                    <tbody>
+                    {% for c in most_resilient %}
+                        <tr>
+                            <td>{{ c.career }}<br><span class="examples">{{ c.major }}</span></td>
+                            <td class="num"><strong>{{ c.ai_impact_score }}</strong></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <h3 style="margin-bottom:12px"><span class="professor-only">Most AI-exposed</span><span class="gamer-only">☠ MOST EXPOSED</span></h3>
+                <table>
+                    <tbody>
+                    {% for c in most_exposed %}
+                        <tr>
+                            <td>{{ c.career }}<br><span class="examples">{{ c.major }}</span></td>
+                            <td class="num"><strong>{{ c.ai_impact_score }}</strong></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ WHAT INFORMED THIS ═══ -->
+    <section>
+        <h2><span class="professor-only">What informed the rubric</span><span class="gamer-only">WHAT INFORMED THE RUBRIC</span></h2>
+        <p class="section-intro professor-only">
+            The dimensions above draw on a body of published research on occupational automation exposure.
+            None of these sources produced the specific numbers in this tool, but they shaped how the
+            dimensions were chosen and weighted:
+        </p>
+        <p class="section-intro gamer-only">
+            THE DIMENSIONS DRAW ON PUBLISHED RESEARCH. NONE OF THESE PRODUCED
+            OUR EXACT NUMBERS, BUT THEY SHAPED THE APPROACH:
+        </p>
+        <ul>
+            <li class="professor-only"><strong>O*NET task and work-activity data</strong> — the U.S. Department of Labor's occupational database, which decomposes jobs into constituent tasks. The starting point for any task-level analysis.</li>
+            <li class="gamer-only"><strong>O*NET TASK DATA</strong> — DOL DATABASE BREAKING JOBS INTO TASKS.</li>
+            <li class="professor-only"><strong>Frey &amp; Osborne (2013)</strong>, "The Future of Employment" — the paper that popularized occupation-level automation probability. Widely critiqued for treating whole occupations as automatable rather than individual tasks, which is why this rubric works at the task level instead.</li>
+            <li class="gamer-only"><strong>FREY &amp; OSBORNE (2013)</strong> — POPULARIZED AUTOMATION PROBABILITY. CRITIQUED FOR WHOLE-JOB SCORING.</li>
+            <li class="professor-only"><strong>Eloundou et al. (2023)</strong>, "GPTs are GPTs" — task-level exposure analysis specifically for large language models, which is the technology most relevant to the white-collar careers in this dataset.</li>
+            <li class="gamer-only"><strong>ELOUNDOU ET AL. (2023)</strong> — TASK-LEVEL EXPOSURE FOR LANGUAGE MODELS.</li>
+            <li class="professor-only"><strong>Felten, Raj &amp; Seamans</strong> — the AI Occupational Exposure index, which maps AI capability advances onto occupational abilities.</li>
+            <li class="gamer-only"><strong>FELTEN, RAJ &amp; SEAMANS</strong> — AI OCCUPATIONAL EXPOSURE INDEX.</li>
+            <li class="professor-only"><strong>BLS Employment Projections (2023–2033)</strong> — used as a sanity check. When a projection strongly contradicted a score, the score was revisited.</li>
+            <li class="gamer-only"><strong>BLS PROJECTIONS 2023-2033</strong> — USED AS A SANITY CHECK.</li>
+        </ul>
+        <p class="professor-only">
+            If you want to dig into the underlying occupational data yourself, every career card links directly
+            to its BLS Occupational Outlook Handbook entry.
+        </p>
+        <p class="gamer-only">
+            EVERY CAREER CARD LINKS TO ITS BLS PAGE IF YOU WANT THE RAW DATA.
+        </p>
+    </section>
+
+    <!-- ═══ LIMITATIONS ═══ -->
+    <section>
+        <h2><span class="professor-only">Known limitations</span><span class="gamer-only">KNOWN LIMITATIONS</span></h2>
+        <div class="callout">
+            <ul style="margin-bottom:0">
+                <li class="professor-only"><strong>Single-assessor bias.</strong> These scores reflect one consistent rubric applied by one source. No panel, no inter-rater reliability check, no confidence intervals.</li>
+                <li class="gamer-only"><strong>SINGLE-ASSESSOR BIAS.</strong> ONE RUBRIC, ONE SOURCE. NO PANEL, NO ERROR BARS.</li>
+                <li class="professor-only"><strong>Snapshot in time.</strong> AI capability moves fast. A score written today may be badly wrong within two years, in either direction.</li>
+                <li class="gamer-only"><strong>SNAPSHOT IN TIME.</strong> AI MOVES FAST. THESE MAY BE WRONG IN 2 YEARS.</li>
+                <li class="professor-only"><strong>Capability ≠ adoption.</strong> Technical feasibility says nothing about how fast employers actually change. Regulation, capital costs, union agreements, and institutional inertia all slow diffusion — sometimes by decades.</li>
+                <li class="gamer-only"><strong>CAPABILITY ≠ ADOPTION.</strong> WHAT'S POSSIBLE ISN'T WHAT EMPLOYERS DO. REGULATION AND INERTIA SLOW THINGS DOWN.</li>
+                <li class="professor-only"><strong>Occupation-level, not job-level.</strong> Two accountants at different firms can face completely different exposure. Your specific employer, specialty, and seniority matter more than the occupational average.</li>
+                <li class="gamer-only"><strong>JOB TITLE ≠ YOUR JOB.</strong> TWO ACCOUNTANTS AT DIFFERENT FIRMS FACE DIFFERENT EXPOSURE.</li>
+                <li class="professor-only"><strong>Ignores new job creation.</strong> The rubric measures pressure on existing tasks. It cannot anticipate roles that don't exist yet — and historically, those have been substantial.</li>
+                <li class="gamer-only"><strong>IGNORES NEW JOBS.</strong> CAN'T PREDICT ROLES THAT DON'T EXIST YET.</li>
+                <li class="professor-only"><strong>No salary or geography adjustment.</strong> Exposure is scored independently of pay or location, though both meaningfully affect real-world outcomes.</li>
+                <li class="gamer-only"><strong>NO PAY OR LOCATION ADJUSTMENT.</strong></li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- ═══ HOW TO USE IT ═══ -->
+    <section>
+        <h2><span class="professor-only">How to actually use this</span><span class="gamer-only">HOW TO USE THIS</span></h2>
+        <ol>
+            <li class="professor-only"><strong>Compare, don't predict.</strong> The gap between a 25 and a 70 is meaningful. The gap between a 48 and a 52 is noise.</li>
+            <li class="gamer-only"><strong>COMPARE, DON'T PREDICT.</strong> 25 vs 70 MATTERS. 48 vs 52 IS NOISE.</li>
+            <li class="professor-only"><strong>Read the analysis, not just the number.</strong> Each career includes a written assessment explaining <em>which</em> tasks are exposed and which are protected. That's where the useful information is.</li>
+            <li class="gamer-only"><strong>READ THE ANALYSIS, NOT JUST THE NUMBER.</strong> THE TEXT EXPLAINS WHICH TASKS ARE EXPOSED.</li>
+            <li class="professor-only"><strong>Weigh it last, not first.</strong> Interest, aptitude, and genuine engagement predict career success far more reliably than any exposure metric. A motivated student in a high-exposure field will outperform a disengaged one in a "safe" field.</li>
+            <li class="gamer-only"><strong>WEIGH IT LAST.</strong> INTEREST AND APTITUDE PREDICT SUCCESS BETTER THAN ANY EXPOSURE SCORE.</li>
+            <li class="professor-only"><strong>Use it to shape electives, not to rule out majors.</strong> The most productive response to a high score is usually adding complementary skills — not abandoning a field you're good at.</li>
+            <li class="gamer-only"><strong>USE IT FOR ELECTIVES, NOT TO RULE OUT MAJORS.</strong> ADD SKILLS INSTEAD OF QUITTING A FIELD YOU'RE GOOD AT.</li>
+            <li class="professor-only"><strong>Talk to a human.</strong> Bryant's Amica Center for Career Education, faculty in your prospective department, and alumni working in the field will all know things this tool doesn't.</li>
+            <li class="gamer-only"><strong>TALK TO A HUMAN.</strong> CAREER SERVICES, FACULTY, AND ALUMNI KNOW THINGS THIS TOOL DOESN'T.</li>
+        </ol>
+    </section>
+
+</div>
+
+<footer>
+    <div class="wrap">
+        <span class="professor-only">
+            AI impact scores are qualitative estimates produced for educational discussion, not forecasts.
+            Salary and growth data are sourced from the
+            <a href="https://www.bls.gov/ooh/" target="_blank">U.S. Bureau of Labor Statistics</a>.
+            <br><a href="/">← Back to the Major Advisor</a>
+        </span>
+        <span class="gamer-only">
+            AI SCORES ARE QUALITATIVE ESTIMATES FOR DISCUSSION, NOT FORECASTS.<br>
+            SALARY DATA FROM <a href="https://www.bls.gov/ooh/" target="_blank">U.S. BUREAU OF LABOR STATISTICS</a><br>
+            <a href="/">◄ BACK TO MAP</a>
+        </span>
+    </div>
+</footer>
+
+<script>
+    function setTheme(theme) {
+        document.body.className = theme;
+        localStorage.setItem('bryantTheme', theme);
+    }
+    setTheme(localStorage.getItem('bryantTheme') || 'professor');
+</script>
+</body>
+</html>

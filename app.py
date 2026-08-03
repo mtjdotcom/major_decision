@@ -1163,6 +1163,54 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/methodology')
+def methodology():
+    """Transparency page explaining how AI impact scores are derived."""
+    all_careers = []
+    for m in MAJORS_DATA:
+        for c in m['careers']:
+            all_careers.append({
+                'major': m['major'],
+                'career': c['title'],
+                'ai_impact': c['ai_impact'],
+                'ai_impact_score': c['ai_impact_score'],
+                'median_salary': c['median_salary'],
+                'growth_rate': c['growth_rate'],
+            })
+
+    bands = [
+        ('Low', 0, 25),
+        ('Low-Medium', 26, 40),
+        ('Medium', 41, 55),
+        ('Medium-High', 56, 70),
+        ('High', 71, 100),
+    ]
+
+    distribution = []
+    total = len(all_careers)
+    for label, lo, hi in bands:
+        members = [c for c in all_careers if lo <= c['ai_impact_score'] <= hi]
+        distribution.append({
+            'label': label,
+            'range': f'{lo}\u2013{hi}',
+            'count': len(members),
+            'pct': round(100 * len(members) / total, 1) if total else 0,
+            'examples': sorted(members, key=lambda c: c['ai_impact_score'])[:4],
+        })
+
+    most_resilient = sorted(all_careers, key=lambda c: c['ai_impact_score'])[:8]
+    most_exposed = sorted(all_careers, key=lambda c: -c['ai_impact_score'])[:8]
+
+    return render_template(
+        'methodology.html',
+        distribution=distribution,
+        total_careers=total,
+        total_majors=len(MAJORS_DATA),
+        most_resilient=most_resilient,
+        most_exposed=most_exposed,
+    )
+
+
 @app.route('/api/majors')
 def get_majors():
     college = request.args.get('college', '')
@@ -1242,4 +1290,6 @@ def stats():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    # Port 5000 is taken by macOS AirPlay Receiver (Control Center), which
+    # answers 403 on IPv6 localhost even when Flask is bound on IPv4.
+    app.run(debug=True, port=5001)
