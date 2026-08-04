@@ -237,6 +237,11 @@
             font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 13px;
         }
         body.professor .clear-btn:hover { color: #f87171; border-color: #f87171; background: rgba(248,113,113,0.08); }
+        body.professor .combine-btn {
+            background: #34d399; color: #0a0c10; border: none; padding: 10px 20px;
+            border-radius: 8px; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 14px;
+        }
+        body.professor .combine-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(52,211,153,0.15); }
         body.professor .grad-badge {
             font-size: 10px; font-weight: 700; letter-spacing: 0.04em;
             color: #a78bfa; border: 1px solid rgba(167,139,250,0.45);
@@ -535,6 +540,13 @@
             box-shadow: inset -2px -2px 0 rgba(0,0,0,0.4), inset 2px 2px 0 rgba(255,255,255,0.15);
         }
         body.gamer .clear-btn:hover { background: #e40058; border-color: #ff4080; transform: scale(1.05); }
+        body.gamer .combine-btn {
+            font-family: 'Press Start 2P', monospace; font-size: 9px;
+            background: #00a800; color: #fcfcfc; border: 3px solid #40d040;
+            border-radius: 0; padding: 10px 16px;
+            box-shadow: inset -2px -2px 0 rgba(0,0,0,0.4), inset 2px 2px 0 rgba(255,255,255,0.2);
+        }
+        body.gamer .combine-btn:hover { transform: scale(1.05); }
         body.gamer .grad-badge {
             font-size: 7px; color: #b8a0ff; border: 2px solid #6040c0;
             background: #181030; border-radius: 0; padding: 3px 5px;
@@ -741,6 +753,8 @@
         .compare-btn.visible { display: block; }
         .clear-btn { display: none; cursor: pointer; }
         .clear-btn.visible { display: block; }
+        .combine-btn { display: none; cursor: pointer; }
+        .combine-btn.visible { display: block; }
         .grad-badge { display: inline-block; white-space: nowrap; cursor: help; }
         .chart-mode-toggle { margin-bottom: 14px; }
         .breadth-line { display: flex; align-items: center; gap: 8px; cursor: help; }
@@ -928,6 +942,7 @@
     <div class="compare-toggle">
         <span class="compare-count" id="compareCount">0 selected</span>
         <button class="clear-btn" id="clearBtn" onclick="clearSelection()">Clear</button>
+        <button class="combine-btn" id="combineBtn" onclick="openCombine()">Combine</button>
         <button class="compare-btn" id="compareBtn" onclick="openCompare()">Compare</button>
     </div>
 </div>
@@ -1019,11 +1034,14 @@ function updateThemeLabels() {
     // Scatter labels
     updateChartTitles();
 
-    // Compare title
-    document.getElementById('compareTitle').textContent = isGamer ? '⚔ BOSS BATTLE: COMPARE MAJORS' : 'Major Comparison';
+    // Compare title (combine mode sets its own title with the major names)
+    if (modalMode !== 'combine') {
+        document.getElementById('compareTitle').textContent = isGamer ? '⚔ BOSS BATTLE: COMPARE MAJORS' : 'Major Comparison';
+    }
 
-    // Compare button text
+    // Compare / Combine button text
     document.getElementById('compareBtn').textContent = isGamer ? '⚔ BATTLE!' : 'Compare';
+    document.getElementById('combineBtn').textContent = isGamer ? '🤝 CO-OP!' : 'Combine';
 
     // Clear button text
     document.getElementById('clearBtn').textContent = isGamer ? '✕ RESET' : 'Clear';
@@ -1057,6 +1075,7 @@ let lastRenderedMajors = [];
 let selectedIds = new Set();
 let currentView = 'cards';
 let chartMode = 'salary';
+let modalMode = null; // 'compare' | 'combine' | null
 let scatterData = null;
 let scatterRendered = false;
 
@@ -1098,6 +1117,7 @@ async function init() {
         if (btn) btn.click();
     }
     if (restored.compare && selectedIds.size >= 2) openCompare();
+    else if (restored.combine && selectedIds.size === 2) openCombine();
 }
 
 function formatSalary(n) { return '$' + n.toLocaleString(); }
@@ -1221,6 +1241,7 @@ function toggleSelect(id, e) {
 function updateCompareUI() {
     const n = selectedIds.size;
     document.getElementById('compareBtn').classList.toggle('visible', n >= 2);
+    document.getElementById('combineBtn').classList.toggle('visible', n === 2);
     document.getElementById('clearBtn').classList.toggle('visible', n > 0);
     const cnt = document.getElementById('compareCount');
     cnt.classList.toggle('visible', n > 0);
@@ -1235,10 +1256,66 @@ function clearSelection(closeModal) {
     syncURL();
 }
 
+function quadrantName(breadth, ai) {
+    if (breadth >= 50) return ai >= 50 ? t('Broad but Exposed','WIDE BUT WILD') : t('Resilient Generalists','OP BUILDS');
+    return ai >= 50 ? t('Danger Zone','☠ BOSS ROOM') : t('Safe Specialists','TANK CLASS');
+}
+
+async function openCombine() {
+    const ids = [...selectedIds];
+    if (ids.length !== 2) return;
+    const res = await fetch('/api/combine?ids=' + ids.join('&ids='));
+    if (!res.ok) return;
+    const d = await res.json();
+    const G = currentTheme === 'gamer';
+    modalMode = 'combine';
+    const names = d.majors.map(m => G ? m.major.toUpperCase() : m.major);
+    document.getElementById('compareTitle').textContent =
+        (G ? '🤝 CO-OP MODE: ' : '') + names.join(' + ');
+
+    const fromQuads = d.majors.map(m => quadrantName(m.breadth_score, m.avg_ai));
+    const toQuad = quadrantName(d.combined_breadth, d.avg_ai);
+    let html = `<div class="compare-grid" style="--cols:1">`;
+    html += `<div class="compare-row"><div class="compare-label">${t('Combined Breadth','SKILL TREE')}</div>
+        <div class="compare-cell"><div class="big" style="color:#3cbcfc">${d.combined_breadth}/100</div>
+        <div class="sub">${t(`max of the pair +${d.breadth_uplift} complementarity uplift`, `BASE + ${d.breadth_uplift} FUSION BONUS`)}</div></div></div>`;
+    html += `<div class="compare-row"><div class="compare-label">${t('Best-Case AI Resilience','BEST DEFENSE')}</div>
+        <div class="compare-cell"><div class="big" style="color:${getAIColor(d.best_career.ai_impact_score)}">${d.best_career.ai_impact_score}/100</div>
+        <div class="sub">${t('via','VIA')} ${G ? d.best_career.title.toUpperCase() : d.best_career.title}</div></div></div>`;
+    html += `<div class="compare-row"><div class="compare-label">${t("Bachelor's-Ready",'NO EXTRA QUESTS')}</div>
+        <div class="compare-cell"><div class="big">${d.bachelors_count} ${t('of','OF')} ${d.total_count}</div>
+        <div class="sub">${t('career paths reachable without a grad degree','PATHS UNLOCKED AT LVL BA')}</div></div></div>`;
+    html += `<div class="compare-row"><div class="compare-label">${t('Quadrant','MAP ZONE')}</div>
+        <div class="compare-cell"><div class="big">${toQuad}</div>
+        <div class="sub">${names[0]}: ${fromQuads[0]} · ${names[1]}: ${fromQuads[1]}</div></div></div>`;
+    html += `</div>`;
+
+    html += `<table class="data-table" style="margin-top:20px"><thead><tr>
+        <th>${t('Career Path','CAREER')}</th><th>${t('Via','VIA')}</th>
+        <th>${t('Median Salary','SALARY')}</th><th>${t('AI Risk','AI')}</th>
+    </tr></thead><tbody>`;
+    html += d.careers.map(c => `<tr>
+        <td>${G ? c.title.toUpperCase() : c.title} ${gradBadge(c)}</td>
+        <td style="opacity:0.6">${c.via.map(v => G ? v.toUpperCase() : v).join(' + ')}</td>
+        <td class="salary-col">${formatSalary(c.median_salary)}</td>
+        <td><span class="ai-badge ${getAIClass(c.ai_impact)}">${c.ai_impact_score}</span></td>
+    </tr>`).join('');
+    html += `</tbody></table>`;
+    html += `<div style="margin-top:14px;opacity:0.55;font-size:${G ? '7px' : '12px'};line-height:1.6">${t(
+        'Careers are the union of both majors’ paths. Breadth uplift = +10 if the colleges differ, +10 scaled by how little the career sets overlap — a disclosed heuristic, not a measurement. As a minor, expect the same direction with a smaller effect. See the methodology page.',
+        'UNION OF BOTH SKILL TREES. FUSION BONUS: +10 CROSS-WORLD, +10 FOR LOW OVERLAP. MINOR = SAME DIRECTION, SMALLER BUFF. SEE METHODOLOGY.')}</div>`;
+
+    document.getElementById('compareContent').innerHTML = html;
+    document.getElementById('compareModal').classList.add('active');
+    syncURL();
+}
+
 async function openCompare() {
     const ids = [...selectedIds];
     const res = await fetch('/api/compare?ids=' + ids.join('&ids='));
     const data = await res.json();
+    modalMode = 'compare';
+    document.getElementById('compareTitle').textContent = currentTheme === 'gamer' ? '⚔ BOSS BATTLE: COMPARE MAJORS' : 'Major Comparison';
     const cols = data.length;
     const G = currentTheme === 'gamer';
     const content = document.getElementById('compareContent');
@@ -1271,6 +1348,7 @@ async function openCompare() {
     syncURL();
 }
 function closeCompare() {
+    modalMode = null;
     document.getElementById('compareModal').classList.remove('active');
     syncURL();
 }
@@ -1587,7 +1665,8 @@ function syncURL() {
     if (currentView !== 'cards') p.set('view', currentView);
     if (chartMode !== 'salary') p.set('chart', chartMode);
     if (selectedIds.size) p.set('sel', [...selectedIds].join(','));
-    if (document.getElementById('compareModal').classList.contains('active')) p.set('compare', '1');
+    if (modalMode === 'compare') p.set('compare', '1');
+    if (modalMode === 'combine') p.set('combine', '1');
     const qs = p.toString();
     history.replaceState(null, '', qs ? '?' + qs : location.pathname);
 }
@@ -1606,6 +1685,7 @@ function restoreFromURL() {
         view: p.get('view'),
         chart: p.get('chart'),
         compare: p.get('compare') === '1',
+        combine: p.get('combine') === '1',
         hasFilters: !!(p.get('college') || p.get('sort') || p.get('ai') || p.get('edu') || p.get('q'))
     };
 }

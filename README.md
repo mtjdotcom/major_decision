@@ -22,6 +22,7 @@ A full 1980s NES arcade experience — Press Start 2P pixel font, CRT scanline o
 - **Grad-school flags** — 🎓 badges on careers needing education beyond a bachelor's, plus a "Bachelor's-Ready Only" filter
 - **Three view modes** — expandable card grid, sortable data table, and two interactive charts: Salary vs. AI Impact (per career) and a Breadth vs. AI Exposure quadrant map (per major, with a labeled "Danger Zone" for focused + exposed majors)
 - **Compare mode** — side-by-side analysis of up to 4 majors
+- **Combine mode** — merge any 2 majors (double major / major + minor) into one profile: union of career paths, best-case AI resilience, bachelor's-reachable count, and combined breadth via a disclosed heuristic
 - **Shareable URLs** — filters, view, and selections are encoded in the address bar, so any state can be sent as a link
 - **Filtering & sorting** — by college, salary, growth rate, AI resilience, career breadth, education level, and free-text search
 - **Fully responsive** — works on desktop, tablet, and mobile
@@ -57,6 +58,7 @@ bryant-major-advisor/
 |----------|--------|-------------|
 | `GET /api/majors` | `college`, `sort`, `ai_impact`, `education` | Filtered/sorted list of all majors with career data. `education=bachelors` keeps only careers reachable without a graduate degree |
 | `GET /api/compare` | `ids` (repeated) | Side-by-side data for up to 4 majors |
+| `GET /api/combine` | `ids` (exactly 2) | Merged profile for a pair of majors: deduped career union, best-case AI resilience, combined breadth |
 | `GET /api/stats` | — | Aggregate stats: counts, averages, and all career data for the scatter chart |
 
 ## Data Sources

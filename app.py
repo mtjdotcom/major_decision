@@ -1391,6 +1391,54 @@ def compare():
     return jsonify(result)
 
 
+@app.route('/api/combine')
+def combine_majors():
+    """Merged profile for a pair of majors (double major / major + minor).
+
+    Everything here is computed from existing per-major data except the
+    combined breadth uplift, whose formula is disclosed on /methodology:
+    max(b1, b2) + 10 if the colleges differ + 10 * (1 - BLS-code overlap),
+    capped at 100.
+    """
+    ids = request.args.getlist('ids', type=int)
+    majors = [m for m in MAJORS_DATA if m['id'] in ids]
+    if len(majors) != 2:
+        return jsonify({'error': 'combine requires exactly 2 valid major ids'}), 400
+    a, b = majors
+
+    merged = {}
+    for m in (a, b):
+        for c in m['careers']:
+            entry = merged.setdefault(c['title'], {**c, 'via': []})
+            if m['major'] not in entry['via']:
+                entry['via'].append(m['major'])
+    careers = sorted(merged.values(), key=lambda c: -c['median_salary'])
+
+    best = min(careers, key=lambda c: c['ai_impact_score'])
+    avg_ai = round(sum(c['ai_impact_score'] for c in careers) / len(careers))
+
+    codes_a = {c['bls_code'] for c in a['careers']}
+    codes_b = {c['bls_code'] for c in b['careers']}
+    overlap = len(codes_a & codes_b) / min(len(codes_a), len(codes_b))
+    uplift = (10 if a['college'] != b['college'] else 0) + round(10 * (1 - overlap))
+    combined_breadth = min(100, max(a['breadth_score'], b['breadth_score']) + uplift)
+
+    return jsonify({
+        'majors': [{
+            'id': m['id'], 'major': m['major'], 'college': m['college'],
+            'breadth_score': m['breadth_score'],
+            'avg_ai': round(sum(c['ai_impact_score'] for c in m['careers']) / len(m['careers'])),
+        } for m in (a, b)],
+        'careers': careers,
+        'combined_breadth': combined_breadth,
+        'breadth_uplift': uplift,
+        'avg_ai': avg_ai,
+        'best_career': {'title': best['title'], 'ai_impact_score': best['ai_impact_score']},
+        'bachelors_count': sum(1 for c in careers if not c.get('grad_required')),
+        'total_count': len(careers),
+    })
+
+
 @app.route('/api/stats')
 def stats():
     all_careers = []
