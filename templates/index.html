@@ -771,6 +771,8 @@
         .cost-control input[type="range"] { width: 110px; cursor: pointer; }
         .payback-line { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
         .payback-note { cursor: help; }
+        .data-table th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
+        .data-table th.sortable:hover { opacity: 0.75; }
         .breadth-line { display: flex; align-items: center; gap: 8px; cursor: help; }
         .breadth-track { flex: 1; height: 5px; position: relative; overflow: hidden; }
         .breadth-fill { position: absolute; left: 0; top: 0; bottom: 0; }
@@ -1098,6 +1100,7 @@ let selectedIds = new Set();
 let currentView = 'cards';
 let chartMode = 'salary';
 let modalMode = null; // 'compare' | 'combine' | null
+let tableSort = null; // {key, dir: 1|-1} — table-view column sort
 const DEFAULT_COST = 47200; // Bryant 2025-26 average net price per year
 let annualCost = DEFAULT_COST;
 let scatterData = null;
@@ -1649,13 +1652,39 @@ function renderTable(majors) {
     let rows = [];
     majors.forEach(m => { m.careers.forEach(c => { rows.push({ major: m.major, college: m.college, ...c }); }); });
     const G = currentTheme === 'gamer';
+
+    // Column config: type 's' sorts as string (first click ascending);
+    // numeric columns default to the direction users actually want first.
+    const cols = [
+        { key: 'major',           label: t('Major','MAJOR'),                    type: 's', dir: 1 },
+        { key: 'title',           label: t('Career Path','CAREER'),             type: 's', dir: 1 },
+        { key: 'median_salary',   label: t('Median Salary','SALARY'),           dir: -1 },
+        { key: 'entry_salary',    label: t('Entry Salary','ENTRY'),             dir: -1 },
+        { key: 'top_salary',      label: t('Top Salary','MAX'),                 dir: -1 },
+        { key: 'growth_rate',     label: t('10yr Growth','GROWTH'),             dir: -1 },
+        { key: 'annual_openings', label: t('Annual Openings','OPENINGS'),       dir: -1 },
+        { key: 'payback',         label: t('Payback','GRIND'),                  dir: 1,
+          tip: t('100% debt financed cost at 6.39%; 20% of salary set aside yearly, salaries +5%/yr; 50+ = payments never catch the interest','FULL COST LOAN @ 6.39%; 20% OF PAY, +5%/YR RAISES; 50+ = INTEREST WINS') },
+        { key: 'ai_impact_score', label: t('AI Risk','AI'),                     dir: 1 },
+    ];
+
+    if (tableSort) {
+        const col = cols.find(c => c.key === tableSort.key);
+        if (col) {
+            const val = r => tableSort.key === 'payback' ? paybackYears(r.entry_salary) : r[tableSort.key];
+            rows.sort((a, b) => tableSort.dir * (col.type === 's'
+                ? String(val(a)).localeCompare(String(val(b)))
+                : val(a) - val(b)));
+        }
+    }
+
     container.innerHTML = `
         <table class="data-table">
-            <thead><tr>
-                <th>${t('Major','MAJOR')}</th><th>${t('Career Path','CAREER')}</th><th>${t('Median Salary','SALARY')}</th>
-                <th>${t('Entry Salary','ENTRY')}</th><th>${t('Top Salary','MAX')}</th><th>${t('10yr Growth','GROWTH')}</th>
-                <th>${t('Annual Openings','OPENINGS')}</th><th title="${t('100% debt financed cost at 6.39%; 20% of salary set aside yearly, salaries +5%/yr; 50+ = payments never catch the interest','FULL COST LOAN @ 6.39%; 20% OF PAY, +5%/YR RAISES; 50+ = INTEREST WINS')}">${t('Payback','GRIND')}</th><th>${t('AI Risk','AI')}</th>
-            </tr></thead>
+            <thead><tr>${cols.map(c => {
+                const active = tableSort && tableSort.key === c.key;
+                const arrow = active ? (tableSort.dir === 1 ? ' ▲' : ' ▼') : '';
+                return `<th class="sortable${active ? ' sorted' : ''}" data-key="${c.key}" data-dir="${c.dir}" data-type="${c.type || 'n'}"${c.tip ? ` title="${c.tip}"` : ''}>${c.label}${arrow}</th>`;
+            }).join('')}</tr></thead>
             <tbody>${rows.map(r => `<tr>
                 <td><strong>${G ? r.major.toUpperCase() : r.major}</strong></td>
                 <td>${G ? r.title.toUpperCase() : r.title} ${gradBadge(r)}</td>
@@ -1670,6 +1699,18 @@ function renderTable(majors) {
         </table>`;
     updatePaybackDisplays();
 }
+
+// Column-header sorting: first click uses the column's natural direction,
+// second click flips it. Delegated because the table is rebuilt on render.
+document.getElementById('tableView').addEventListener('click', (e) => {
+    const th = e.target.closest('th[data-key]');
+    if (!th) return;
+    const key = th.dataset.key;
+    if (tableSort && tableSort.key === key) tableSort.dir *= -1;
+    else tableSort = { key, dir: +th.dataset.dir };
+    renderTable(lastRenderedMajors);
+    syncURL();
+});
 
 // View switching (scoped to [data-view] so the chart-mode toggle, which shares
 // the .view-toggle class for styling, doesn't trigger it)
@@ -1745,6 +1786,7 @@ function syncURL() {
     if (currentView !== 'cards') p.set('view', currentView);
     if (chartMode !== 'salary') p.set('chart', chartMode);
     if (annualCost !== DEFAULT_COST) p.set('cost', annualCost);
+    if (tableSort) p.set('tsort', tableSort.key + '.' + (tableSort.dir === 1 ? 'a' : 'd'));
     if (selectedIds.size) p.set('sel', [...selectedIds].join(','));
     if (modalMode === 'compare') p.set('compare', '1');
     if (modalMode === 'combine') p.set('combine', '1');
@@ -1765,6 +1807,8 @@ function restoreFromURL() {
         annualCost = cost;
         document.getElementById('costSlider').value = cost;
     }
+    const ts = (p.get('tsort') || '').match(/^([a-z_]+)\.(a|d)$/);
+    if (ts) tableSort = { key: ts[1], dir: ts[2] === 'a' ? 1 : -1 };
     (p.get('sel') || '').split(',').map(Number).filter(n => n > 0).slice(0, 4)
         .forEach(id => selectedIds.add(id));
     return {
