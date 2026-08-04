@@ -742,6 +742,7 @@
         .clear-btn { display: none; cursor: pointer; }
         .clear-btn.visible { display: block; }
         .grad-badge { display: inline-block; white-space: nowrap; cursor: help; }
+        .chart-mode-toggle { margin-bottom: 14px; }
         .breadth-line { display: flex; align-items: center; gap: 8px; cursor: help; }
         .breadth-track { flex: 1; height: 5px; position: relative; overflow: hidden; }
         .breadth-fill { position: absolute; left: 0; top: 0; bottom: 0; }
@@ -936,6 +937,10 @@
     <div class="scatter-container" id="scatterView">
         <div class="scatter-title" id="scatterTitle">Salary vs. AI Exposure</div>
         <div class="scatter-subtitle" id="scatterSub">Each dot represents a career path. Larger dots = faster job growth. Hover for details.</div>
+        <div class="view-toggle chart-mode-toggle" id="chartModeToggle">
+            <button class="active" data-mode="salary" data-prof="Salary vs AI" data-game="GOLD MAP">Salary vs AI</button>
+            <button data-mode="breadth" data-prof="Breadth vs AI" data-game="BOSS MAP">Breadth vs AI</button>
+        </div>
         <div class="scatter-chart" id="scatterChart">
             <div class="scatter-tooltip" id="scatterTooltip"></div>
         </div>
@@ -943,7 +948,7 @@
             <div class="scatter-legend-item"><div class="scatter-legend-dot" style="background:#60a5fa"></div> <span data-prof="College of Business" data-game="BUSINESS">College of Business</span></div>
             <div class="scatter-legend-item"><div class="scatter-legend-dot" style="background:#a78bfa"></div> <span data-prof="Arts & Sciences" data-game="ARTS & SCI">Arts & Sciences</span></div>
             <div class="scatter-legend-item"><div class="scatter-legend-dot" style="background:#34d399"></div> <span data-prof="Health & Behavioral Sciences" data-game="HEALTH & BS">Health & Behavioral Sciences</span></div>
-            <div class="scatter-legend-item"><span style="font-size:inherit;color:inherit" data-prof="Dot size = Job growth rate" data-game="BLOCK SIZE = GROWTH RATE">Dot size = Job growth rate</span></div>
+            <div class="scatter-legend-item" id="legendSizeNote"><span style="font-size:inherit;color:inherit" data-prof="Dot size = Job growth rate" data-game="BLOCK SIZE = GROWTH RATE">Dot size = Job growth rate</span></div>
         </div>
     </div>
     <div class="table-container" id="tableView"></div>
@@ -988,6 +993,8 @@ function setTheme(theme) {
     localStorage.setItem('bryantTheme', theme);
     updateThemeLabels();
     renderCards(lastRenderedMajors);
+    // Redraw the chart so its translated labels match the theme
+    if (currentView === 'scatter' && scatterRendered) requestAnimationFrame(renderChart);
 }
 
 function updateThemeLabels() {
@@ -1010,10 +1017,7 @@ function updateThemeLabels() {
         : 'Explore 31 Bryant University majors with real salary data, job growth projections from the Bureau of Labor Statistics, and an AI-readiness assessment for every career path.';
 
     // Scatter labels
-    document.getElementById('scatterTitle').textContent = isGamer ? '⚔ SALARY vs AI DANGER MAP' : 'Salary vs. AI Exposure';
-    document.getElementById('scatterSub').textContent = isGamer
-        ? 'EACH BLOCK = A CAREER. BIGGER = FASTER GROWTH. HOVER FOR INTEL.'
-        : 'Each dot represents a career path. Larger dots = faster job growth. Hover for details.';
+    updateChartTitles();
 
     // Compare title
     document.getElementById('compareTitle').textContent = isGamer ? '⚔ BOSS BATTLE: COMPARE MAJORS' : 'Major Comparison';
@@ -1052,6 +1056,7 @@ let allMajors = [];
 let lastRenderedMajors = [];
 let selectedIds = new Set();
 let currentView = 'cards';
+let chartMode = 'salary';
 let scatterData = null;
 let scatterRendered = false;
 
@@ -1080,6 +1085,12 @@ async function init() {
     setTheme(currentTheme);
 
     // Re-apply state restored from a shared URL
+    if (restored.chart === 'breadth') {
+        chartMode = 'breadth';
+        document.querySelectorAll('#chartModeToggle button').forEach(b =>
+            b.classList.toggle('active', b.dataset.mode === 'breadth'));
+        updateChartTitles();
+    }
     if (restored.hasFilters) await applyFilters();
     if (selectedIds.size) { updateCompareUI(); renderCards(lastRenderedMajors); }
     if (restored.view && restored.view !== 'cards') {
@@ -1264,6 +1275,127 @@ function closeCompare() {
     syncURL();
 }
 
+function updateChartTitles() {
+    const isGamer = currentTheme === 'gamer';
+    const title = document.getElementById('scatterTitle');
+    const sub = document.getElementById('scatterSub');
+    // The size note only applies to the salary chart (breadth dots are uniform)
+    document.getElementById('legendSizeNote').style.display = chartMode === 'breadth' ? 'none' : '';
+    if (chartMode === 'breadth') {
+        title.textContent = isGamer ? '⚔ SKILL TREE vs DANGER MAP' : 'Career Breadth vs. AI Exposure';
+        sub.textContent = isGamer
+            ? 'ONE BLOCK = ONE MAJOR. BOTH SCORES ARE ESTIMATES — READ ZONES, NOT PIXELS.'
+            : 'One dot per major. Both scores are rubric-based estimates — read quadrants, not positions. Hover for details.';
+    } else {
+        title.textContent = isGamer ? '⚔ SALARY vs AI DANGER MAP' : 'Salary vs. AI Exposure';
+        sub.textContent = isGamer
+            ? 'EACH BLOCK = A CAREER. BIGGER = FASTER GROWTH. HOVER FOR INTEL.'
+            : 'Each dot represents a career path. Larger dots = faster job growth. Hover for details.';
+    }
+}
+
+function renderChart() {
+    if (chartMode === 'breadth') renderQuadrant(allMajors);
+    else if (scatterData) renderScatter(scatterData);
+}
+
+function majorAvgAI(m) {
+    return Math.round(m.careers.reduce((s, c) => s + c.ai_impact_score, 0) / m.careers.length);
+}
+
+function renderQuadrant(majors) {
+    const chart = document.getElementById('scatterChart');
+    const tooltip = document.getElementById('scatterTooltip');
+    chart.innerHTML = '';
+    chart.appendChild(tooltip);
+
+    const padLeft = 70, padTop = 20, padRight = 20, padBottom = 36;
+    const totalW = chart.clientWidth;
+    const totalH = chart.clientHeight;
+    const plotW = totalW - padLeft - padRight;
+    const plotH = totalH - padTop - padBottom;
+
+    // Quadrant shading + corner labels. x: avg AI exposure, y: breadth (high = top)
+    const quads = [
+        { x0: 0,   y0: 0,   color: 'rgba(52,211,153,0.08)',  label: t('Resilient Generalists','OP BUILDS'),   pos: 'tl' },
+        { x0: 0.5, y0: 0,   color: 'rgba(251,191,36,0.08)',  label: t('Broad but Exposed','WIDE BUT WILD'),   pos: 'tr' },
+        { x0: 0,   y0: 0.5, color: 'rgba(96,165,250,0.08)',  label: t('Safe Specialists','TANK CLASS'),       pos: 'bl' },
+        { x0: 0.5, y0: 0.5, color: 'rgba(248,113,113,0.12)', label: t('Danger Zone','☠ BOSS ROOM'),           pos: 'br' }
+    ];
+    quads.forEach(q => {
+        const rect = document.createElement('div');
+        rect.style.cssText = `position:absolute;left:${padLeft + q.x0 * plotW}px;top:${padTop + q.y0 * plotH}px;width:${plotW / 2}px;height:${plotH / 2}px;background:${q.color};`;
+        chart.appendChild(rect);
+        const lab = document.createElement('div');
+        lab.className = 'scatter-tick';
+        const lx = q.pos[1] === 'l' ? `left:${padLeft + 10}px;` : `right:${padRight + 10}px;text-align:right;`;
+        const ly = q.pos[0] === 't' ? `top:${padTop + 8}px;` : `top:${padTop + plotH - 24}px;`;
+        lab.style.cssText = lx + ly + 'opacity:0.8;font-weight:700;';
+        lab.textContent = q.label;
+        chart.appendChild(lab);
+    });
+
+    // Gridlines + ticks every 25 on both axes; midline at 50 emphasized
+    for (let i = 0; i <= 4; i++) {
+        const frac = i / 4, val = i * 25;
+        const y = padTop + (1 - frac) * plotH;
+        const hline = document.createElement('div');
+        hline.style.cssText = `position:absolute;left:${padLeft}px;right:${padRight}px;top:${y}px;height:${val === 50 ? 2 : 1}px;background:currentColor;opacity:${val === 50 ? 0.3 : 0.12};`;
+        chart.appendChild(hline);
+        const ytick = document.createElement('div');
+        ytick.className = 'scatter-tick';
+        ytick.style.cssText = `left:0;width:${padLeft - 8}px;text-align:right;top:${y - 7}px;`;
+        ytick.textContent = val;
+        chart.appendChild(ytick);
+
+        const x = padLeft + frac * plotW;
+        const vline = document.createElement('div');
+        vline.style.cssText = `position:absolute;top:${padTop}px;bottom:${padBottom}px;left:${x}px;width:${val === 50 ? 2 : 1}px;background:currentColor;opacity:${val === 50 ? 0.3 : 0.12};`;
+        chart.appendChild(vline);
+        const xtick = document.createElement('div');
+        xtick.className = 'scatter-tick';
+        xtick.style.cssText = `left:${x - 12}px;bottom:${padBottom - 22}px;width:24px;text-align:center;`;
+        xtick.textContent = val;
+        chart.appendChild(xtick);
+    }
+
+    // Axis labels
+    const xLabel = document.createElement('div');
+    xLabel.className = 'scatter-tick';
+    xLabel.style.cssText = `left:${padLeft}px;right:${padRight}px;bottom:0;text-align:center;`;
+    xLabel.textContent = t('Avg AI Exposure of Career Paths →','AVG AI DANGER →');
+    chart.appendChild(xLabel);
+    const yLabel = document.createElement('div');
+    yLabel.className = 'scatter-tick';
+    yLabel.style.cssText = `left:0;top:50%;transform:rotate(-90deg) translateX(-50%);transform-origin:0 0;white-space:nowrap;`;
+    yLabel.textContent = t('← Career Breadth','← SKILL TREE');
+    chart.appendChild(yLabel);
+
+    // One dot per major
+    majors.forEach(m => {
+        const ai = majorAvgAI(m);
+        const x = padLeft + (ai / 100) * plotW;
+        const y = padTop + (1 - m.breadth_score / 100) * plotH;
+        const size = 15;
+        let color = '#60a5fa';
+        if (m.college.includes('Arts')) color = '#a78bfa';
+        else if (m.college.includes('Health')) color = '#34d399';
+        const dot = document.createElement('div');
+        dot.className = 'scatter-dot';
+        dot.style.cssText = `left:${x - size/2}px;top:${y - size/2}px;width:${size}px;height:${size}px;background:${color};opacity:0.85;`;
+        dot.addEventListener('mouseenter', () => {
+            const quad = quads[(m.breadth_score >= 50 ? 0 : 2) + (ai >= 50 ? 1 : 0)];
+            tooltip.innerHTML = `<strong>${t(m.major, m.major.toUpperCase())}</strong><br><span style="opacity:0.7">${quad.label}</span><br>${t('Breadth','TREE')}: <strong>${m.breadth_score}/100</strong> (${m.breadth_label})<br>${t('Avg AI exposure','AVG DANGER')}: <strong style="color:${getAIColor(ai)}">${ai}/100</strong>`;
+            tooltip.classList.add('active');
+            const tipX = (x + size + 8 + 220 > totalW) ? x - 230 : x + size + 8;
+            tooltip.style.left = tipX + 'px';
+            tooltip.style.top = Math.max(0, y - 30) + 'px';
+        });
+        dot.addEventListener('mouseleave', () => { tooltip.classList.remove('active'); });
+        chart.appendChild(dot);
+    });
+}
+
 function renderScatter(careers) {
     const chart = document.getElementById('scatterChart');
     // Clear any previous render
@@ -1381,19 +1513,34 @@ function renderTable(majors) {
         </table>`;
 }
 
-// View switching
-document.querySelectorAll('.view-toggle button').forEach(btn => {
+// View switching (scoped to [data-view] so the chart-mode toggle, which shares
+// the .view-toggle class for styling, doesn't trigger it)
+document.querySelectorAll('.view-toggle button[data-view]').forEach(btn => {
     btn.addEventListener('click', () => {
-        document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.view-toggle button[data-view]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentView = btn.dataset.view;
         document.getElementById('majorGrid').style.display = currentView === 'cards' ? 'grid' : 'none';
         document.getElementById('tableView').classList.toggle('active', currentView === 'table');
         document.getElementById('scatterView').classList.toggle('active', currentView === 'scatter');
-        if (currentView === 'scatter' && scatterData && !scatterRendered) {
+        if (currentView === 'scatter' && !scatterRendered) {
             // Small delay to ensure container is visible and has dimensions
-            requestAnimationFrame(() => { renderScatter(scatterData); scatterRendered = true; });
+            requestAnimationFrame(() => { renderChart(); scatterRendered = true; });
         }
+        syncURL();
+    });
+});
+
+// Chart mode toggle (Salary vs AI / Breadth vs AI)
+document.querySelectorAll('#chartModeToggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (chartMode === btn.dataset.mode) return;
+        document.querySelectorAll('#chartModeToggle button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        chartMode = btn.dataset.mode;
+        updateChartTitles();
+        if (currentView === 'scatter') requestAnimationFrame(() => { renderChart(); scatterRendered = true; });
+        else scatterRendered = false;
         syncURL();
     });
 });
@@ -1438,6 +1585,7 @@ function syncURL() {
     if (edu) p.set('edu', edu);
     if (q) p.set('q', q);
     if (currentView !== 'cards') p.set('view', currentView);
+    if (chartMode !== 'salary') p.set('chart', chartMode);
     if (selectedIds.size) p.set('sel', [...selectedIds].join(','));
     if (document.getElementById('compareModal').classList.contains('active')) p.set('compare', '1');
     const qs = p.toString();
@@ -1456,6 +1604,7 @@ function restoreFromURL() {
         .forEach(id => selectedIds.add(id));
     return {
         view: p.get('view'),
+        chart: p.get('chart'),
         compare: p.get('compare') === '1',
         hasFilters: !!(p.get('college') || p.get('sort') || p.get('ai') || p.get('edu') || p.get('q'))
     };

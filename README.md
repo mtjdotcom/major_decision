@@ -20,7 +20,7 @@ A full 1980s NES arcade experience — Press Start 2P pixel font, CRT scanline o
 - **AI impact scores** (0–100) with detailed qualitative analysis per career
 - **Career breadth scores** (0–100) per major — how widely grads spread across occupations, with "where grads land" summaries
 - **Grad-school flags** — 🎓 badges on careers needing education beyond a bachelor's, plus a "Bachelor's-Ready Only" filter
-- **Three view modes** — expandable card grid, sortable data table, and interactive scatter chart (Salary vs. AI Impact)
+- **Three view modes** — expandable card grid, sortable data table, and two interactive charts: Salary vs. AI Impact (per career) and a Breadth vs. AI Exposure quadrant map (per major, with a labeled "Danger Zone" for focused + exposed majors)
 - **Compare mode** — side-by-side analysis of up to 4 majors
 - **Shareable URLs** — filters, view, and selections are encoded in the address bar, so any state can be sent as a link
 - **Filtering & sorting** — by college, salary, growth rate, AI resilience, career breadth, education level, and free-text search
