@@ -23,7 +23,8 @@ A full 1980s NES arcade experience — Press Start 2P pixel font, CRT scanline o
 - **Three view modes** — expandable card grid, sortable data table, and two interactive charts: Salary vs. AI Impact (per career) and a Breadth vs. AI Exposure quadrant map (per major, with a labeled "Danger Zone" for focused + exposed majors)
 - **Compare mode** — side-by-side analysis of up to 4 majors
 - **Combine mode** — merge any 2 majors (double major / major + minor) into one profile: union of career paths, best-case AI resilience, bachelor's-reachable count, and combined breadth via a disclosed heuristic
-- **Shareable URLs** — filters, view, and selections are encoded in the address bar, so any state can be sent as a link
+- **Payback estimates** — years to recoup your degree cost at 15% of entry salary, with an adjustable net-cost slider (defaults to Bryant's published average net price)
+- **Shareable URLs** — filters, view, selections, and your cost setting are encoded in the address bar, so any state can be sent as a link
 - **Filtering & sorting** — by college, salary, growth rate, AI resilience, career breadth, education level, and free-text search
 - **Fully responsive** — works on desktop, tablet, and mobile
 

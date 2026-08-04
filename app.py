@@ -1376,6 +1376,10 @@ def get_majors():
         filtered = sorted(filtered, key=lambda m: max(c['ai_impact_score'] for c in m['careers']), reverse=True)
     elif sort_by == 'breadth':
         filtered = sorted(filtered, key=lambda m: m['breadth_score'], reverse=True)
+    elif sort_by == 'payback':
+        # Payback rank is cost-independent: cost is the same for every major,
+        # so fastest payback = highest entry salary
+        filtered = sorted(filtered, key=lambda m: max(c['entry_salary'] for c in m['careers']), reverse=True)
     elif sort_by == 'name':
         filtered = sorted(filtered, key=lambda m: m['major'])
 
