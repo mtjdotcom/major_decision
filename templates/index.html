@@ -1169,17 +1169,32 @@ function getAIColor(score) {
 function t(prof, game) { return currentTheme === 'gamer' ? game : prof; }
 
 /* ═══════ Payback estimate ═══════
-   Assumes the full 4-year net cost is debt financed and 20% of gross
-   entry salary is set aside for repayment each year.
+   Year-by-year amortization: the full 4-year net cost is debt financed
+   at the 2025-26 federal undergraduate rate; each year 20% of salary
+   (starting at entry, growing 5%/yr) is paid against the balance.
+   Displays "50+" when the payment never catches the interest.
    Rendered as <span class="payback-val" data-entry="..."> and recomputed
    in place when the cost slider moves, so open cards stay open. */
 const REPAY_SHARE = 0.20;
+const RAISE_RATE = 0.05;
+const LOAN_RATE = 0.0639;
+const PAYBACK_CAP = 50;
 function paybackYears(entrySalary) {
-    return (4 * annualCost) / (REPAY_SHARE * entrySalary);
+    let balance = 4 * annualCost;
+    let payment = REPAY_SHARE * entrySalary;
+    for (let y = 0; y < PAYBACK_CAP; y++) {
+        balance *= (1 + LOAN_RATE);
+        if (payment >= balance) return y + balance / payment;
+        balance -= payment;
+        payment *= (1 + RAISE_RATE);
+    }
+    return Infinity;
 }
 
 function formatPayback(entrySalary) {
-    return '≈' + paybackYears(entrySalary).toFixed(1) + ' ' + t('yrs', 'YRS');
+    const y = paybackYears(entrySalary);
+    if (y >= PAYBACK_CAP) return '50+ ' + t('yrs', 'YRS');
+    return '≈' + y.toFixed(1) + ' ' + t('yrs', 'YRS');
 }
 
 function paybackSpan(c) {
@@ -1262,9 +1277,9 @@ function renderCards(majors) {
                                 <div class="salary-bar-median" style="left:${(c.median_salary / 350000) * 100}%"></div>
                             </div>
                         </div>
-                        <div class="payback-line" title="${t('Assumes the full 4-year net cost is borrowed. Adjust the cost slider above to your aid letter.','ASSUMES FULL LOAN. SET YOUR COIN COST ABOVE.')}">
+                        <div class="payback-line" title="${t('Assumes the full 4-year net cost is borrowed at the 2025–26 federal undergraduate rate. Adjust the cost slider above to your aid letter. 50+ means payments never catch the interest at these assumptions.','ASSUMES FULL LOAN AT FEDERAL RATE. SET YOUR COIN COST ABOVE. 50+ = INTEREST WINS.')}">
                             <span>${t('Payback (100% debt financed):','GRIND TIME (FULL LOAN):')}</span> ${paybackSpan(c)}
-                            <span class="payback-note">${t('with 20% of entry salary set aside for repayment each year','20% OF LVL 1 PAY SET ASIDE / YR')}</span>
+                            <span class="payback-note">${t('20% of salary set aside yearly · salaries +5%/yr · 6.39% loan interest','20% OF PAY · +5%/YR RAISES · 6.39% INTEREST')}</span>
                         </div>
                         <div class="ai-impact-section">
                             <div class="ai-impact-header">
@@ -1350,7 +1365,7 @@ async function openCombine() {
 
     html += `<table class="data-table" style="margin-top:20px"><thead><tr>
         <th>${t('Career Path','CAREER')}</th><th>${t('Via','VIA')}</th>
-        <th>${t('Median Salary','SALARY')}</th><th title="${t('100% debt financed; 20% of entry salary set aside for repayment each year','FULL LOAN; 20% OF LVL 1 PAY / YR')}">${t('Payback','GRIND')}</th><th>${t('AI Risk','AI')}</th>
+        <th>${t('Median Salary','SALARY')}</th><th title="${t('100% debt financed at 6.39%; 20% of salary set aside yearly, salaries +5%/yr; 50+ = payments never catch the interest','FULL LOAN @ 6.39%; 20% OF PAY, +5%/YR RAISES; 50+ = INTEREST WINS')}">${t('Payback','GRIND')}</th><th>${t('AI Risk','AI')}</th>
     </tr></thead><tbody>`;
     html += d.careers.map(c => `<tr>
         <td>${G ? c.title.toUpperCase() : c.title} ${gradBadge(c)}</td>
@@ -1397,7 +1412,7 @@ async function openCompare() {
     }).join('')}</div>`;
     html += `<div class="compare-row"><div class="compare-label">${t('Career Breadth','SKILL TREE')}</div>${data.map(m =>
         `<div class="compare-cell" title="${m.typical_outcomes}"><div class="big" style="color:#3cbcfc">${m.breadth_score}/100</div><div class="sub">${G ? m.breadth_label.toUpperCase() : m.breadth_label}</div></div>`).join('')}</div>`;
-    html += `<div class="compare-row"><div class="compare-label" title="${t('100% debt financed; 20% of entry salary set aside for repayment each year','FULL LOAN; 20% OF LVL 1 PAY / YR')}">${t('Fastest Payback','SPEEDRUN')}</div>${data.map(m => {
+    html += `<div class="compare-row"><div class="compare-label" title="${t('100% debt financed at 6.39%; 20% of salary set aside yearly, salaries +5%/yr; 50+ = payments never catch the interest','FULL LOAN @ 6.39%; 20% OF PAY, +5%/YR RAISES; 50+ = INTEREST WINS')}">${t('Fastest Payback','SPEEDRUN')}</div>${data.map(m => {
         const best = m.careers.reduce((a, c) => c.entry_salary > a.entry_salary ? c : a);
         return `<div class="compare-cell"><div class="big">${paybackSpan(best)}</div><div class="sub">${G ? best.title.toUpperCase() : best.title}</div></div>`;
     }).join('')}</div>`;
@@ -1639,7 +1654,7 @@ function renderTable(majors) {
             <thead><tr>
                 <th>${t('Major','MAJOR')}</th><th>${t('Career Path','CAREER')}</th><th>${t('Median Salary','SALARY')}</th>
                 <th>${t('Entry Salary','ENTRY')}</th><th>${t('Top Salary','MAX')}</th><th>${t('10yr Growth','GROWTH')}</th>
-                <th>${t('Annual Openings','OPENINGS')}</th><th title="${t('100% debt financed; 20% of entry salary set aside for repayment each year','FULL LOAN; 20% OF LVL 1 PAY / YR')}">${t('Payback','GRIND')}</th><th>${t('AI Risk','AI')}</th>
+                <th>${t('Annual Openings','OPENINGS')}</th><th title="${t('100% debt financed at 6.39%; 20% of salary set aside yearly, salaries +5%/yr; 50+ = payments never catch the interest','FULL LOAN @ 6.39%; 20% OF PAY, +5%/YR RAISES; 50+ = INTEREST WINS')}">${t('Payback','GRIND')}</th><th>${t('AI Risk','AI')}</th>
             </tr></thead>
             <tbody>${rows.map(r => `<tr>
                 <td><strong>${G ? r.major.toUpperCase() : r.major}</strong></td>
