@@ -1169,11 +1169,13 @@ function getAIColor(score) {
 function t(prof, game) { return currentTheme === 'gamer' ? game : prof; }
 
 /* ═══════ Payback estimate ═══════
-   years = (4 years x annual net cost) / (15% of entry salary).
+   Assumes the full 4-year net cost is debt financed and 20% of gross
+   entry salary is set aside for repayment each year.
    Rendered as <span class="payback-val" data-entry="..."> and recomputed
    in place when the cost slider moves, so open cards stay open. */
+const REPAY_SHARE = 0.20;
 function paybackYears(entrySalary) {
-    return (4 * annualCost) / (0.15 * entrySalary);
+    return (4 * annualCost) / (REPAY_SHARE * entrySalary);
 }
 
 function formatPayback(entrySalary) {
@@ -1260,9 +1262,9 @@ function renderCards(majors) {
                                 <div class="salary-bar-median" style="left:${(c.median_salary / 350000) * 100}%"></div>
                             </div>
                         </div>
-                        <div class="payback-line" title="${t('Four years at your net cost, repaid at 15% of this career’s entry salary. Adjust the cost slider above.','4YR COIN COST / 15% OF LVL 1 SALARY')}">
-                            <span>${t('Payback:','GRIND TIME:')}</span> ${paybackSpan(c)}
-                            <span class="payback-note">${t('at 15% of entry salary','AT 15% LVL 1 PAY')}</span>
+                        <div class="payback-line" title="${t('Assumes the full 4-year net cost is borrowed. Adjust the cost slider above to your aid letter.','ASSUMES FULL LOAN. SET YOUR COIN COST ABOVE.')}">
+                            <span>${t('Payback (100% debt financed):','GRIND TIME (FULL LOAN):')}</span> ${paybackSpan(c)}
+                            <span class="payback-note">${t('with 20% of entry salary set aside for repayment each year','20% OF LVL 1 PAY SET ASIDE / YR')}</span>
                         </div>
                         <div class="ai-impact-section">
                             <div class="ai-impact-header">
@@ -1348,7 +1350,7 @@ async function openCombine() {
 
     html += `<table class="data-table" style="margin-top:20px"><thead><tr>
         <th>${t('Career Path','CAREER')}</th><th>${t('Via','VIA')}</th>
-        <th>${t('Median Salary','SALARY')}</th><th>${t('Payback','GRIND')}</th><th>${t('AI Risk','AI')}</th>
+        <th>${t('Median Salary','SALARY')}</th><th title="${t('100% debt financed; 20% of entry salary set aside for repayment each year','FULL LOAN; 20% OF LVL 1 PAY / YR')}">${t('Payback','GRIND')}</th><th>${t('AI Risk','AI')}</th>
     </tr></thead><tbody>`;
     html += d.careers.map(c => `<tr>
         <td>${G ? c.title.toUpperCase() : c.title} ${gradBadge(c)}</td>
@@ -1395,7 +1397,7 @@ async function openCompare() {
     }).join('')}</div>`;
     html += `<div class="compare-row"><div class="compare-label">${t('Career Breadth','SKILL TREE')}</div>${data.map(m =>
         `<div class="compare-cell" title="${m.typical_outcomes}"><div class="big" style="color:#3cbcfc">${m.breadth_score}/100</div><div class="sub">${G ? m.breadth_label.toUpperCase() : m.breadth_label}</div></div>`).join('')}</div>`;
-    html += `<div class="compare-row"><div class="compare-label">${t('Fastest Payback','SPEEDRUN')}</div>${data.map(m => {
+    html += `<div class="compare-row"><div class="compare-label" title="${t('100% debt financed; 20% of entry salary set aside for repayment each year','FULL LOAN; 20% OF LVL 1 PAY / YR')}">${t('Fastest Payback','SPEEDRUN')}</div>${data.map(m => {
         const best = m.careers.reduce((a, c) => c.entry_salary > a.entry_salary ? c : a);
         return `<div class="compare-cell"><div class="big">${paybackSpan(best)}</div><div class="sub">${G ? best.title.toUpperCase() : best.title}</div></div>`;
     }).join('')}</div>`;
@@ -1637,7 +1639,7 @@ function renderTable(majors) {
             <thead><tr>
                 <th>${t('Major','MAJOR')}</th><th>${t('Career Path','CAREER')}</th><th>${t('Median Salary','SALARY')}</th>
                 <th>${t('Entry Salary','ENTRY')}</th><th>${t('Top Salary','MAX')}</th><th>${t('10yr Growth','GROWTH')}</th>
-                <th>${t('Annual Openings','OPENINGS')}</th><th>${t('Payback','GRIND')}</th><th>${t('AI Risk','AI')}</th>
+                <th>${t('Annual Openings','OPENINGS')}</th><th title="${t('100% debt financed; 20% of entry salary set aside for repayment each year','FULL LOAN; 20% OF LVL 1 PAY / YR')}">${t('Payback','GRIND')}</th><th>${t('AI Risk','AI')}</th>
             </tr></thead>
             <tbody>${rows.map(r => `<tr>
                 <td><strong>${G ? r.major.toUpperCase() : r.major}</strong></td>
