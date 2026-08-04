@@ -242,6 +242,10 @@
             color: #a78bfa; border: 1px solid rgba(167,139,250,0.45);
             background: rgba(167,139,250,0.08); border-radius: 5px; padding: 2px 6px;
         }
+        body.professor .breadth-line { font-size: 12px; color: #8890a4; margin: 6px 0 12px; }
+        body.professor .breadth-line strong { color: #7dd3fc; font-weight: 700; }
+        body.professor .breadth-track { background: #1a1e28; border-radius: 3px; }
+        body.professor .breadth-fill { background: linear-gradient(90deg, #38bdf8, #7dd3fc); border-radius: 3px; }
 
         /* — Content — */
         body.professor .content {
@@ -535,6 +539,10 @@
             font-size: 7px; color: #b8a0ff; border: 2px solid #6040c0;
             background: #181030; border-radius: 0; padding: 3px 5px;
         }
+        body.gamer .breadth-line { font-size: 7px; color: #686868; margin: 8px 0 12px; }
+        body.gamer .breadth-line strong { color: #3cbcfc; }
+        body.gamer .breadth-track { background: #000; border: 2px solid #4040a0; height: 9px; }
+        body.gamer .breadth-fill { background: repeating-linear-gradient(90deg, #3cbcfc 0 6px, #0078f8 6px 12px); }
 
         /* — Content — */
         body.gamer .content {
@@ -734,6 +742,9 @@
         .clear-btn { display: none; cursor: pointer; }
         .clear-btn.visible { display: block; }
         .grad-badge { display: inline-block; white-space: nowrap; cursor: help; }
+        .breadth-line { display: flex; align-items: center; gap: 8px; cursor: help; }
+        .breadth-track { flex: 1; height: 5px; position: relative; overflow: hidden; }
+        .breadth-fill { position: absolute; left: 0; top: 0; bottom: 0; }
         .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
         .major-grid { display: grid; gap: 16px; }
         .major-card { position: relative; }
@@ -880,6 +891,7 @@
             <option value="growth">Fastest Growth</option>
             <option value="ai_safe">Most AI-Resilient</option>
             <option value="ai_risk">Most AI-Exposed</option>
+            <option value="breadth" data-prof="Broadest Careers" data-game="BIG SKILL TREE">Broadest Careers</option>
         </select>
     </div>
     <div class="control-group">
@@ -1127,6 +1139,11 @@ function renderCards(majors) {
                 <span class="college-tag ${getCollegeClass(m.college)}">${getCollegeShort(m.college)}</span>
             </div>
             <div class="card-desc">${m.description}</div>
+            <div class="breadth-line" title="${m.typical_outcomes}">
+                <span>${t('Career Breadth:','SKILL TREE:')}</span>
+                <div class="breadth-track"><div class="breadth-fill" style="width:${m.breadth_score}%"></div></div>
+                <strong>${G ? m.breadth_label.toUpperCase() : m.breadth_label}</strong>
+            </div>
             ${m.careers.map((c, i) => {
                 const cTitle = G ? c.title.toUpperCase() : c.title;
                 return `
@@ -1231,6 +1248,8 @@ async function openCompare() {
         const safest = m.careers.reduce((a, b) => a.ai_impact_score < b.ai_impact_score ? a : b);
         return `<div class="compare-cell"><div class="big" style="color:${getAIColor(safest.ai_impact_score)}">${safest.ai_impact_score}/100</div><div class="sub">${G ? safest.ai_impact.toUpperCase() : safest.ai_impact}</div></div>`;
     }).join('')}</div>`;
+    html += `<div class="compare-row"><div class="compare-label">${t('Career Breadth','SKILL TREE')}</div>${data.map(m =>
+        `<div class="compare-cell" title="${m.typical_outcomes}"><div class="big" style="color:#3cbcfc">${m.breadth_score}/100</div><div class="sub">${G ? m.breadth_label.toUpperCase() : m.breadth_label}</div></div>`).join('')}</div>`;
     html += `<div class="compare-row"><div class="compare-label">${t('Annual Openings','SPAWNS/YR')}</div>${data.map(m => {
         const total = m.careers.reduce((s, c) => s + c.annual_openings, 0);
         return `<div class="compare-cell"><div class="big">${total.toLocaleString()}</div><div class="sub">${t('per year','JOB OPENINGS')}</div></div>`;

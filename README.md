@@ -18,9 +18,12 @@ A full 1980s NES arcade experience — Press Start 2P pixel font, CRT scanline o
 - **BLS salary data** — entry-level, median, and top-end salaries for every career
 - **10-year job growth projections** from the Bureau of Labor Statistics (2023–2033)
 - **AI impact scores** (0–100) with detailed qualitative analysis per career
+- **Career breadth scores** (0–100) per major — how widely grads spread across occupations, with "where grads land" summaries
+- **Grad-school flags** — 🎓 badges on careers needing education beyond a bachelor's, plus a "Bachelor's-Ready Only" filter
 - **Three view modes** — expandable card grid, sortable data table, and interactive scatter chart (Salary vs. AI Impact)
 - **Compare mode** — side-by-side analysis of up to 4 majors
-- **Filtering & sorting** — by college, salary, growth rate, AI resilience, and free-text search
+- **Shareable URLs** — filters, view, and selections are encoded in the address bar, so any state can be sent as a link
+- **Filtering & sorting** — by college, salary, growth rate, AI resilience, career breadth, education level, and free-text search
 - **Fully responsive** — works on desktop, tablet, and mobile
 
 ## Quick Start
@@ -33,7 +36,7 @@ pip install flask
 python app.py
 
 # 3. Open in your browser
-http://127.0.0.1:5000
+http://localhost:5001
 ```
 
 No database, no build tools, no external APIs needed. All data is embedded in `app.py`.

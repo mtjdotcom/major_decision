@@ -12,6 +12,9 @@ MAJORS_DATA = [
         "college": "College of Business",
         "degree": "BSBA",
         "description": "Ranked in the top 4% nationally. Prepares for CPA and professional exams through real-world learning.",
+        "breadth_score": 35,
+        "breadth_label": "Focused",
+        "typical_outcomes": "A defined pipeline: most grads start in public accounting or corporate accounting on the CPA track, with later pivots into consulting, forensics, and CFO roles.",
         "careers": [
             {
                 "title": "Accountant / Auditor",
@@ -51,6 +54,9 @@ MAJORS_DATA = [
         "college": "College of Arts & Sciences",
         "degree": "BS",
         "description": "Intersects mathematics and business. 100% employment rate for graduates. Prepares for actuarial exams.",
+        "breadth_score": 20,
+        "breadth_label": "Focused",
+        "typical_outcomes": "One of the most focused paths in the catalog — nearly all grads pursue actuarial roles in insurance and pensions, with the exam track mapped out for a decade.",
         "careers": [
             {
                 "title": "Actuary",
@@ -75,6 +81,9 @@ MAJORS_DATA = [
         "college": "College of Arts & Sciences",
         "degree": "BS",
         "description": "Develop skills to solve real-world problems through mathematical principles and statistical methods.",
+        "breadth_score": 90,
+        "breadth_label": "Very Broad",
+        "typical_outcomes": "A classic generalist launchpad: grads land in banking, tech, insurance, government, and research — quantitative skills transfer almost anywhere.",
         "careers": [
             {
                 "title": "Mathematician / Statistician",
@@ -116,6 +125,9 @@ MAJORS_DATA = [
         "college": "College of Arts & Sciences",
         "degree": "BA",
         "description": "Gain skills for creative ambitions with studio and practical learning in arts management and production.",
+        "breadth_score": 45,
+        "breadth_label": "Moderate",
+        "typical_outcomes": "Grads scatter across media production, arts management, advertising, and design — many doors, but most are within the creative economy.",
         "careers": [
             {
                 "title": "Art Director",
@@ -155,6 +167,9 @@ MAJORS_DATA = [
         "college": "School of Health & Behavioral Sciences",
         "degree": "BS",
         "description": "Multi-track program with General Biology, Pre-Health, and Environmental Biology tracks.",
+        "breadth_score": 55,
+        "breadth_label": "Moderate",
+        "typical_outcomes": "Splits between lab and health tracks: research, biotech, pharma sales, and public health at the bachelor's level; medicine and academia via further study.",
         "careers": [
             {
                 "title": "Biological Scientist",
@@ -196,6 +211,9 @@ MAJORS_DATA = [
         "college": "College of Arts & Sciences",
         "degree": "BS",
         "description": "Combine economic theory with business application for analytical decision-making roles.",
+        "breadth_score": 80,
+        "breadth_label": "Very Broad",
+        "typical_outcomes": "Grads spread across banking, consulting, analytics, policy, and corporate strategy — economics reads as rigorous-generalist to nearly every employer.",
         "careers": [
             {
                 "title": "Economist",
@@ -237,6 +255,9 @@ MAJORS_DATA = [
         "college": "College of Arts & Sciences",
         "degree": "BA",
         "description": "Develop strategic communication skills across media, public relations, and organizational contexts.",
+        "breadth_score": 65,
+        "breadth_label": "Broad",
+        "typical_outcomes": "Feeds PR, corporate communications, media, marketing, and event roles across every industry — breadth comes from every organization needing communicators.",
         "careers": [
             {
                 "title": "Public Relations Specialist",
@@ -276,6 +297,9 @@ MAJORS_DATA = [
         "college": "College of Business",
         "degree": "BSBA",
         "description": "Learn to extract insights from complex data using statistical methods, machine learning, and analytics.",
+        "breadth_score": 85,
+        "breadth_label": "Very Broad",
+        "typical_outcomes": "In demand across every sector: tech, finance, healthcare, retail, sports, and government all hire data scientists and analysts from the same degree.",
         "careers": [
             {
                 "title": "Data Scientist",
@@ -315,6 +339,9 @@ MAJORS_DATA = [
         "college": "College of Business",
         "degree": "BS",
         "description": "Develop the skills to launch and grow ventures through innovation, business planning, and leadership.",
+        "breadth_score": 70,
+        "breadth_label": "Broad",
+        "typical_outcomes": "By design an option-generator: grads found ventures, join startups, or take generalist business roles in product, operations, and sales.",
         "careers": [
             {
                 "title": "Management Analyst / Consultant",
@@ -354,6 +381,9 @@ MAJORS_DATA = [
         "college": "College of Business",
         "degree": "BSBA",
         "description": "Build expertise in financial analysis, investment management, and corporate finance strategy.",
+        "breadth_score": 75,
+        "breadth_label": "Broad",
+        "typical_outcomes": "Broad within the money economy: investment banking, wealth management, corporate finance, VC/PE, and fintech all recruit from the same degree.",
         "careers": [
             {
                 "title": "Financial Analyst",
@@ -393,6 +423,9 @@ MAJORS_DATA = [
         "college": "College of Business",
         "degree": "BSBA",
         "description": "Specialize in banking, insurance, real estate, and financial planning services.",
+        "breadth_score": 45,
+        "breadth_label": "Moderate",
+        "typical_outcomes": "More specialized than general finance — grads concentrate in banking, insurance, and lending operations, with wealth advisory as the main branch point.",
         "careers": [
             {
                 "title": "Loan Officer",
@@ -432,6 +465,9 @@ MAJORS_DATA = [
         "college": "College of Business",
         "degree": "BSBA",
         "description": "Master logistics, procurement, and operations management in a global business context.",
+        "breadth_score": 50,
+        "breadth_label": "Moderate",
+        "typical_outcomes": "Grads take logistics, procurement, and operations roles across manufacturers, retailers, and 3PLs — one function, but needed in every industry.",
         "careers": [
             {
                 "title": "Logistician",
@@ -471,6 +507,9 @@ MAJORS_DATA = [
         "college": "College of Business",
         "degree": "BSBA",
         "description": "Prepare to lead healthcare organizations with business acumen and industry-specific strategy.",
+        "breadth_score": 40,
+        "breadth_label": "Moderate",
+        "typical_outcomes": "A sector bet rather than a function bet: grads run departments, practices, and programs across a healthcare industry that is reliably growing.",
         "careers": [
             {
                 "title": "Medical & Health Services Manager",
@@ -495,6 +534,9 @@ MAJORS_DATA = [
         "college": "School of Health & Behavioral Sciences",
         "degree": "BS",
         "description": "Bridge healthcare and technology by managing health data systems and analytics.",
+        "breadth_score": 35,
+        "breadth_label": "Focused",
+        "typical_outcomes": "A deliberate niche at the intersection of health and IT — grads work in EHR systems, health data, and clinical analytics, mostly inside healthcare.",
         "careers": [
             {
                 "title": "Health Information Technologist",
@@ -519,6 +561,9 @@ MAJORS_DATA = [
         "college": "School of Health & Behavioral Sciences",
         "degree": "BS",
         "description": "Tracks in General Health Sciences, Neuroscience, and Nutrition for diverse health career paths.",
+        "breadth_score": 50,
+        "breadth_label": "Moderate",
+        "typical_outcomes": "A springboard degree: many paths (nursing, PA, PT, nutrition, public health) but most of the high-earning ones require a graduate program.",
         "careers": [
             {
                 "title": "Registered Nurse (with further education)",
@@ -562,6 +607,9 @@ MAJORS_DATA = [
         "college": "College of Arts & Sciences",
         "degree": "BA",
         "description": "Develop critical thinking, research, and analytical writing skills through historical study.",
+        "breadth_score": 60,
+        "breadth_label": "Broad",
+        "typical_outcomes": "The archetypal generalist humanities degree: grads go to law school, government, education, museums, journalism, and business — strong skills, self-directed path.",
         "careers": [
             {
                 "title": "Historian",
@@ -603,6 +651,9 @@ MAJORS_DATA = [
         "college": "College of Business",
         "degree": "BSBA",
         "description": "Learn to manage talent, organizational development, and workplace strategy.",
+        "breadth_score": 35,
+        "breadth_label": "Focused",
+        "typical_outcomes": "A defined function: grads enter recruiting, benefits, and HR generalist roles, deepening within people operations as they advance.",
         "careers": [
             {
                 "title": "Human Resources Manager",
@@ -642,6 +693,9 @@ MAJORS_DATA = [
         "college": "College of Business",
         "degree": "BSBA",
         "description": "Bridge business and technology by designing and managing enterprise information systems.",
+        "breadth_score": 70,
+        "breadth_label": "Broad",
+        "typical_outcomes": "Every company runs on systems — grads take analyst, security, IT management, and implementation roles across all industries.",
         "careers": [
             {
                 "title": "Computer Systems Analyst",
@@ -681,6 +735,9 @@ MAJORS_DATA = [
         "college": "College of Business",
         "degree": "BSIB",
         "description": "Prepare for global business careers with concentrations across business disciplines and language study.",
+        "breadth_score": 70,
+        "breadth_label": "Broad",
+        "typical_outcomes": "Pairs business breadth with a global lens: grads land in multinationals, trade, consulting, and cross-border operations, often leveraging language skills.",
         "careers": [
             {
                 "title": "Management Analyst / Consultant",
@@ -720,6 +777,9 @@ MAJORS_DATA = [
         "college": "College of Business",
         "degree": "BSBA",
         "description": "Develop leadership capabilities and innovation management skills for dynamic organizations.",
+        "breadth_score": 60,
+        "breadth_label": "Broad",
+        "typical_outcomes": "A generalist management degree: grads enter rotational programs, operations, and team-lead roles — broad, but the path is what you make it.",
         "careers": [
             {
                 "title": "Training & Development Manager",
@@ -759,6 +819,9 @@ MAJORS_DATA = [
         "college": "College of Arts & Sciences",
         "degree": "BA",
         "description": "Develop critical analysis, cultural literacy, and advanced communication skills through literary study.",
+        "breadth_score": 55,
+        "breadth_label": "Moderate",
+        "typical_outcomes": "Writing and analysis transfer widely — grads become editors, content strategists, teachers, and marketers, though rarely via a marked pipeline.",
         "careers": [
             {
                 "title": "Editor",
@@ -798,6 +861,9 @@ MAJORS_DATA = [
         "college": "College of Business",
         "degree": "BSBA",
         "description": "Learn consumer behavior, brand strategy, and marketing analytics for modern business.",
+        "breadth_score": 70,
+        "breadth_label": "Broad",
+        "typical_outcomes": "Spans brand, digital, research, sales, and product marketing across every consumer and B2B industry — a function with many specializations.",
         "careers": [
             {
                 "title": "Marketing Manager",
@@ -837,6 +903,9 @@ MAJORS_DATA = [
         "college": "College of Business",
         "degree": "BSBA",
         "description": "Specialize in data-driven digital marketing strategies including SEO, social media, and analytics.",
+        "breadth_score": 50,
+        "breadth_label": "Moderate",
+        "typical_outcomes": "A sharper version of marketing: grads concentrate in SEO, paid media, social, and analytics roles — deep demand, narrower lane.",
         "careers": [
             {
                 "title": "Advertising & Promotions Manager",
@@ -876,6 +945,9 @@ MAJORS_DATA = [
         "college": "College of Arts & Sciences",
         "degree": "BA",
         "description": "Study political systems, legal theory, and public policy to prepare for law, government, or advocacy careers.",
+        "breadth_score": 55,
+        "breadth_label": "Moderate",
+        "typical_outcomes": "Feeds law school, government, campaigns, and policy work — real breadth, but the highest-earning branches run through a JD.",
         "careers": [
             {
                 "title": "Lawyer (with further education)",
@@ -919,6 +991,9 @@ MAJORS_DATA = [
         "college": "School of Health & Behavioral Sciences",
         "degree": "BS",
         "description": "Understand human behavior through scientific study, preparing for clinical, research, or business roles.",
+        "breadth_score": 65,
+        "breadth_label": "Broad",
+        "typical_outcomes": "At the bachelor's level grads fan out into HR, UX research, sales, and social services; clinical practice requires the doctoral branch.",
         "careers": [
             {
                 "title": "Clinical Psychologist (with further education)",
@@ -962,6 +1037,9 @@ MAJORS_DATA = [
         "college": "College of Arts & Sciences",
         "degree": "BA",
         "description": "Explore perspectives on people, society, and culture for a critical understanding of our global community.",
+        "breadth_score": 55,
+        "breadth_label": "Moderate",
+        "typical_outcomes": "Grads take research, community services, HR, and market-insight roles — transferable analytical skills without a single marked pipeline.",
         "careers": [
             {
                 "title": "Social & Community Service Manager",
@@ -1003,6 +1081,9 @@ MAJORS_DATA = [
         "college": "College of Arts & Sciences",
         "degree": "BA",
         "description": "Develop advanced Spanish proficiency and cultural understanding for global career success.",
+        "breadth_score": 40,
+        "breadth_label": "Moderate",
+        "typical_outcomes": "Usually strongest as a multiplier on another field — grads work in translation, education, and international business, often pairing the language with a second skill.",
         "careers": [
             {
                 "title": "Interpreter / Translator",
@@ -1044,6 +1125,9 @@ MAJORS_DATA = [
         "college": "College of Arts & Sciences",
         "degree": "BA",
         "description": "Take a multifaceted look at the global sports phenomenon through media, business, and culture.",
+        "breadth_score": 30,
+        "breadth_label": "Focused",
+        "typical_outcomes": "A passion-industry bet: grads compete for agency, media, and team-front-office roles inside a single, crowded sector.",
         "careers": [
             {
                 "title": "Sports Agent / Promoter",
@@ -1083,6 +1167,9 @@ MAJORS_DATA = [
         "college": "School of Health & Behavioral Sciences",
         "degree": "BS",
         "description": "Study human movement and exercise science with tracks in Applied Exercise/Coaching and Healthcare Provider Prep.",
+        "breadth_score": 30,
+        "breadth_label": "Focused",
+        "typical_outcomes": "A focused clinical-prep track: grads become trainers and exercise physiologists or continue to PT/OT school — mostly within health and fitness.",
         "careers": [
             {
                 "title": "Exercise Physiologist",
@@ -1124,6 +1211,9 @@ MAJORS_DATA = [
         "college": "College of Business",
         "degree": "BSBA",
         "description": "Master the skills to lead teams and manage complex projects across industries.",
+        "breadth_score": 65,
+        "breadth_label": "Broad",
+        "typical_outcomes": "Project managers are needed in construction, tech, healthcare, and finance alike — one skill set, hireable nearly everywhere.",
         "careers": [
             {
                 "title": "Project Management Specialist",
@@ -1148,6 +1238,9 @@ MAJORS_DATA = [
         "college": "College of Business",
         "degree": "BSBA",
         "description": "Combine accounting expertise with financial analysis for strategic business decision-making roles.",
+        "breadth_score": 55,
+        "breadth_label": "Moderate",
+        "typical_outcomes": "Broader than pure accounting: grads move between corporate accounting, FP&A, and finance manager tracks inside companies of every kind.",
         "careers": [
             {
                 "title": "Financial Manager",
@@ -1281,6 +1374,8 @@ def get_majors():
         filtered = sorted(filtered, key=lambda m: min(c['ai_impact_score'] for c in m['careers']))
     elif sort_by == 'ai_risk':
         filtered = sorted(filtered, key=lambda m: max(c['ai_impact_score'] for c in m['careers']), reverse=True)
+    elif sort_by == 'breadth':
+        filtered = sorted(filtered, key=lambda m: m['breadth_score'], reverse=True)
     elif sort_by == 'name':
         filtered = sorted(filtered, key=lambda m: m['major'])
 
