@@ -52,7 +52,7 @@ bryant-major-advisor/
 
 | Endpoint | Params | Description |
 |----------|--------|-------------|
-| `GET /api/majors` | `college`, `sort`, `ai_impact` | Filtered/sorted list of all majors with career data |
+| `GET /api/majors` | `college`, `sort`, `ai_impact`, `education` | Filtered/sorted list of all majors with career data. `education=bachelors` keeps only careers reachable without a graduate degree |
 | `GET /api/compare` | `ids` (repeated) | Side-by-side data for up to 4 majors |
 | `GET /api/stats` | — | Aggregate stats: counts, averages, and all career data for the scatter chart |
 

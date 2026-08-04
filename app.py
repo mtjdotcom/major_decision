@@ -78,6 +78,8 @@ MAJORS_DATA = [
         "careers": [
             {
                 "title": "Mathematician / Statistician",
+                "grad_required": True,
+                "grad_label": "Master's degree typically required",
                 "bls_code": "15-2041",
                 "median_salary": 104860,
                 "entry_salary": 61070,
@@ -171,6 +173,8 @@ MAJORS_DATA = [
             },
             {
                 "title": "Physician / Surgeon (with further education)",
+                "grad_required": True,
+                "grad_label": "Medical school (MD/DO) required",
                 "bls_code": "29-1228",
                 "median_salary": 229300,
                 "entry_salary": 68000,
@@ -195,6 +199,8 @@ MAJORS_DATA = [
         "careers": [
             {
                 "title": "Economist",
+                "grad_required": True,
+                "grad_label": "Master's degree typically required",
                 "bls_code": "19-3011",
                 "median_salary": 115730,
                 "entry_salary": 65550,
@@ -516,6 +522,8 @@ MAJORS_DATA = [
         "careers": [
             {
                 "title": "Registered Nurse (with further education)",
+                "grad_required": True,
+                "grad_label": "Nursing program (BSN/ABSN) required",
                 "bls_code": "29-1141",
                 "median_salary": 86070,
                 "entry_salary": 61250,
@@ -531,6 +539,8 @@ MAJORS_DATA = [
             },
             {
                 "title": "Dietitian / Nutritionist",
+                "grad_required": True,
+                "grad_label": "Master's required for RD credential (since 2024)",
                 "bls_code": "29-1031",
                 "median_salary": 69680,
                 "entry_salary": 43580,
@@ -555,6 +565,8 @@ MAJORS_DATA = [
         "careers": [
             {
                 "title": "Historian",
+                "grad_required": True,
+                "grad_label": "Master's degree typically required",
                 "bls_code": "19-3093",
                 "median_salary": 68870,
                 "entry_salary": 36700,
@@ -867,6 +879,8 @@ MAJORS_DATA = [
         "careers": [
             {
                 "title": "Lawyer (with further education)",
+                "grad_required": True,
+                "grad_label": "Law school (JD) required",
                 "bls_code": "23-1011",
                 "median_salary": 145760,
                 "entry_salary": 67490,
@@ -882,6 +896,8 @@ MAJORS_DATA = [
             },
             {
                 "title": "Political Scientist",
+                "grad_required": True,
+                "grad_label": "Master's degree typically required",
                 "bls_code": "19-3094",
                 "median_salary": 132820,
                 "entry_salary": 64500,
@@ -906,6 +922,8 @@ MAJORS_DATA = [
         "careers": [
             {
                 "title": "Clinical Psychologist (with further education)",
+                "grad_required": True,
+                "grad_label": "Doctorate (PhD/PsyD) required",
                 "bls_code": "19-3031",
                 "median_salary": 92740,
                 "entry_salary": 51570,
@@ -921,6 +939,8 @@ MAJORS_DATA = [
             },
             {
                 "title": "Industrial-Organizational Psychologist",
+                "grad_required": True,
+                "grad_label": "Master's degree typically required",
                 "bls_code": "19-3032",
                 "median_salary": 147750,
                 "entry_salary": 76250,
@@ -960,6 +980,8 @@ MAJORS_DATA = [
             },
             {
                 "title": "Survey Researcher",
+                "grad_required": True,
+                "grad_label": "Master's degree typically required",
                 "bls_code": "19-3022",
                 "median_salary": 60960,
                 "entry_salary": 36410,
@@ -999,6 +1021,8 @@ MAJORS_DATA = [
             },
             {
                 "title": "Foreign Language Teacher (Post-secondary)",
+                "grad_required": True,
+                "grad_label": "Master's or PhD typically required",
                 "bls_code": "25-1124",
                 "median_salary": 75810,
                 "entry_salary": 41590,
@@ -1077,6 +1101,8 @@ MAJORS_DATA = [
             },
             {
                 "title": "Athletic Trainer",
+                "grad_required": True,
+                "grad_label": "Master's degree required",
                 "bls_code": "29-9091",
                 "median_salary": 56420,
                 "entry_salary": 37180,
@@ -1216,11 +1242,20 @@ def get_majors():
     college = request.args.get('college', '')
     sort_by = request.args.get('sort', '')
     ai_filter = request.args.get('ai_impact', '')
+    education = request.args.get('education', '')
 
     filtered = MAJORS_DATA
 
     if college:
         filtered = [m for m in filtered if m['college'] == college]
+
+    if education == 'bachelors':
+        # Keep only careers reachable with a bachelor's; drop majors with none left
+        filtered = [
+            {**m, 'careers': [c for c in m['careers'] if not c.get('grad_required')]}
+            for m in filtered
+        ]
+        filtered = [m for m in filtered if m['careers']]
 
     if ai_filter:
         ranges = {
@@ -1272,7 +1307,8 @@ def stats():
                 'median_salary': c['median_salary'],
                 'growth_rate': c['growth_rate'],
                 'ai_impact_score': c['ai_impact_score'],
-                'ai_impact': c['ai_impact']
+                'ai_impact': c['ai_impact'],
+                'grad_required': c.get('grad_required', False)
             })
 
     avg_salary = sum(c['median_salary'] for c in all_careers) / len(all_careers)

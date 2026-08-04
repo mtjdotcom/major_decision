@@ -237,6 +237,11 @@
             font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 13px;
         }
         body.professor .clear-btn:hover { color: #f87171; border-color: #f87171; background: rgba(248,113,113,0.08); }
+        body.professor .grad-badge {
+            font-size: 10px; font-weight: 700; letter-spacing: 0.04em;
+            color: #a78bfa; border: 1px solid rgba(167,139,250,0.45);
+            background: rgba(167,139,250,0.08); border-radius: 5px; padding: 2px 6px;
+        }
 
         /* — Content — */
         body.professor .content {
@@ -526,6 +531,10 @@
             box-shadow: inset -2px -2px 0 rgba(0,0,0,0.4), inset 2px 2px 0 rgba(255,255,255,0.15);
         }
         body.gamer .clear-btn:hover { background: #e40058; border-color: #ff4080; transform: scale(1.05); }
+        body.gamer .grad-badge {
+            font-size: 7px; color: #b8a0ff; border: 2px solid #6040c0;
+            background: #181030; border-radius: 0; padding: 3px 5px;
+        }
 
         /* — Content — */
         body.gamer .content {
@@ -724,6 +733,7 @@
         .compare-btn.visible { display: block; }
         .clear-btn { display: none; cursor: pointer; }
         .clear-btn.visible { display: block; }
+        .grad-badge { display: inline-block; white-space: nowrap; cursor: help; }
         .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
         .major-grid { display: grid; gap: 16px; }
         .major-card { position: relative; }
@@ -883,6 +893,13 @@
             <option value="high" data-prof="High (Most Exposed)" data-game="☠ DANGER">High (Most Exposed)</option>
         </select>
     </div>
+    <div class="control-group">
+        <label data-prof="Education" data-game="DEGREE">Education</label>
+        <select id="filterEdu">
+            <option value="">All Career Paths</option>
+            <option value="bachelors" data-prof="Bachelor's-Ready Only" data-game="NO EXTRA QUESTS">Bachelor's-Ready Only</option>
+        </select>
+    </div>
     <div class="control-group search-box">
         <label data-prof="Search" data-game="SEARCH">Search</label>
         <input type="text" id="searchInput" placeholder="Search majors or careers…">
@@ -1027,6 +1044,8 @@ let scatterData = null;
 let scatterRendered = false;
 
 async function init() {
+    const restored = restoreFromURL();
+
     const [majorsRes, statsRes] = await Promise.all([
         fetch('/api/majors?sort=name'),
         fetch('/api/stats')
@@ -1047,6 +1066,15 @@ async function init() {
 
     // Apply saved theme
     setTheme(currentTheme);
+
+    // Re-apply state restored from a shared URL
+    if (restored.hasFilters) await applyFilters();
+    if (selectedIds.size) { updateCompareUI(); renderCards(lastRenderedMajors); }
+    if (restored.view && restored.view !== 'cards') {
+        const btn = document.querySelector(`.view-toggle button[data-view="${restored.view}"]`);
+        if (btn) btn.click();
+    }
+    if (restored.compare && selectedIds.size >= 2) openCompare();
 }
 
 function formatSalary(n) { return '$' + n.toLocaleString(); }
@@ -1072,6 +1100,11 @@ function getAIColor(score) {
 }
 
 function t(prof, game) { return currentTheme === 'gamer' ? game : prof; }
+
+function gradBadge(c) {
+    if (!c.grad_required) return '';
+    return `<span class="grad-badge" title="${c.grad_label || 'Requires education beyond a bachelor’s degree'}">${t('🎓 Grad degree','🎓 LVL UP REQ')}</span>`;
+}
 
 function renderCards(majors) {
     lastRenderedMajors = majors;
@@ -1099,7 +1132,7 @@ function renderCards(majors) {
                 return `
                 <div class="career-block" id="career-${m.id}-${i}">
                     <div class="career-header" onclick="toggleCareer('career-${m.id}-${i}')">
-                        <span class="career-title">${cTitle}</span>
+                        <span class="career-title">${cTitle} ${gradBadge(c)}</span>
                         <span class="career-salary">${formatSalary(c.median_salary)}</span>
                         <span class="career-expand-icon">${G ? '▼' : '▾'}</span>
                     </div>
@@ -1154,6 +1187,7 @@ function toggleSelect(id, e) {
     else { if (selectedIds.size >= 4) { alert(currentTheme === 'gamer' ? 'MAX 4 PLAYERS!' : 'You can compare up to 4 majors.'); return; } selectedIds.add(id); }
     updateCompareUI();
     renderCards(lastRenderedMajors);
+    syncURL();
 }
 
 function updateCompareUI() {
@@ -1170,6 +1204,7 @@ function clearSelection(closeModal) {
     updateCompareUI();
     renderCards(lastRenderedMajors);
     if (closeModal) closeCompare();
+    syncURL();
 }
 
 async function openCompare() {
@@ -1203,8 +1238,12 @@ async function openCompare() {
     html += '</div>';
     content.innerHTML = html;
     document.getElementById('compareModal').classList.add('active');
+    syncURL();
 }
-function closeCompare() { document.getElementById('compareModal').classList.remove('active'); }
+function closeCompare() {
+    document.getElementById('compareModal').classList.remove('active');
+    syncURL();
+}
 
 function renderScatter(careers) {
     const chart = document.getElementById('scatterChart');
@@ -1287,7 +1326,7 @@ function renderScatter(careers) {
         dot.className = 'scatter-dot';
         dot.style.cssText = `left:${x - size/2}px;top:${y - size/2}px;width:${size}px;height:${size}px;background:${color};opacity:0.85;`;
         dot.addEventListener('mouseenter', () => {
-            tooltip.innerHTML = `<strong>${c.career}</strong><br><span style="opacity:0.7">${c.major}</span><br>Salary: <strong>${formatSalary(c.median_salary)}</strong><br>Growth: <strong>${c.growth_rate}%</strong> · AI: <strong style="color:${getAIColor(c.ai_impact_score)}">${c.ai_impact_score}/100</strong>`;
+            tooltip.innerHTML = `<strong>${c.career}</strong><br><span style="opacity:0.7">${c.major}</span><br>Salary: <strong>${formatSalary(c.median_salary)}</strong><br>Growth: <strong>${c.growth_rate}%</strong> · AI: <strong style="color:${getAIColor(c.ai_impact_score)}">${c.ai_impact_score}/100</strong>${c.grad_required ? `<br>${t('🎓 Grad degree required','🎓 LVL UP REQ')}` : ''}`;
             tooltip.classList.add('active');
             const tipX = (x + size + 8 + 220 > totalW) ? x - 230 : x + size + 8;
             tooltip.style.left = tipX + 'px';
@@ -1312,7 +1351,7 @@ function renderTable(majors) {
             </tr></thead>
             <tbody>${rows.map(r => `<tr>
                 <td><strong>${G ? r.major.toUpperCase() : r.major}</strong></td>
-                <td>${G ? r.title.toUpperCase() : r.title}</td>
+                <td>${G ? r.title.toUpperCase() : r.title} ${gradBadge(r)}</td>
                 <td class="salary-col">${formatSalary(r.median_salary)}</td>
                 <td style="opacity:0.6">${formatSalary(r.entry_salary)}</td>
                 <td style="opacity:0.6">${formatSalary(r.top_salary)}</td>
@@ -1336,6 +1375,7 @@ document.querySelectorAll('.view-toggle button').forEach(btn => {
             // Small delay to ensure container is visible and has dimensions
             requestAnimationFrame(() => { renderScatter(scatterData); scatterRendered = true; });
         }
+        syncURL();
     });
 });
 
@@ -1344,11 +1384,13 @@ async function applyFilters() {
     const college = document.getElementById('filterCollege').value;
     const sort = document.getElementById('sortBy').value;
     const ai = document.getElementById('filterAI').value;
+    const edu = document.getElementById('filterEdu').value;
     const search = document.getElementById('searchInput').value.toLowerCase();
     const params = new URLSearchParams();
     if (college) params.set('college', college);
     if (sort) params.set('sort', sort);
     if (ai) params.set('ai_impact', ai);
+    if (edu) params.set('education', edu);
     const res = await fetch('/api/majors?' + params.toString());
     let data = await res.json();
     if (search) {
@@ -1360,11 +1402,50 @@ async function applyFilters() {
     }
     renderCards(data);
     renderTable(data);
+    syncURL();
+}
+
+/* ═══════ Shareable URL state ═══════ */
+function syncURL() {
+    const p = new URLSearchParams();
+    const college = document.getElementById('filterCollege').value;
+    const sort = document.getElementById('sortBy').value;
+    const ai = document.getElementById('filterAI').value;
+    const edu = document.getElementById('filterEdu').value;
+    const q = document.getElementById('searchInput').value;
+    if (college) p.set('college', college);
+    if (sort && sort !== 'name') p.set('sort', sort);
+    if (ai) p.set('ai', ai);
+    if (edu) p.set('edu', edu);
+    if (q) p.set('q', q);
+    if (currentView !== 'cards') p.set('view', currentView);
+    if (selectedIds.size) p.set('sel', [...selectedIds].join(','));
+    if (document.getElementById('compareModal').classList.contains('active')) p.set('compare', '1');
+    const qs = p.toString();
+    history.replaceState(null, '', qs ? '?' + qs : location.pathname);
+}
+
+function restoreFromURL() {
+    const p = new URLSearchParams(location.search);
+    const setVal = (id, v) => { if (v !== null) document.getElementById(id).value = v; };
+    setVal('filterCollege', p.get('college'));
+    setVal('sortBy', p.get('sort'));
+    setVal('filterAI', p.get('ai'));
+    setVal('filterEdu', p.get('edu'));
+    setVal('searchInput', p.get('q'));
+    (p.get('sel') || '').split(',').map(Number).filter(n => n > 0).slice(0, 4)
+        .forEach(id => selectedIds.add(id));
+    return {
+        view: p.get('view'),
+        compare: p.get('compare') === '1',
+        hasFilters: !!(p.get('college') || p.get('sort') || p.get('ai') || p.get('edu') || p.get('q'))
+    };
 }
 
 document.getElementById('filterCollege').addEventListener('change', applyFilters);
 document.getElementById('sortBy').addEventListener('change', applyFilters);
 document.getElementById('filterAI').addEventListener('change', applyFilters);
+document.getElementById('filterEdu').addEventListener('change', applyFilters);
 document.getElementById('searchInput').addEventListener('input', applyFilters);
 document.getElementById('compareModal').addEventListener('click', (e) => {
     if (e.target === document.getElementById('compareModal')) closeCompare();
